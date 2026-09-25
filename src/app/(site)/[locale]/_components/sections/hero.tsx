@@ -31,15 +31,38 @@ export async function Hero({ locale, dict }: { locale: Locale; dict: Dictionary 
     business?.name ?? `${brand.wordmark.before}${brand.wordmark.accent}${brand.wordmark.after}`
   ).toUpperCase();
 
+  // The wordmark is sized from the LONGEST WORD in the name, not from the
+  // viewport alone.
+  //
+  // At a flat 19vw a name like "BAYANBOGD CAR WASH" wraps at its spaces but
+  // the word BAYANBOGD still measures 1362px inside a 1072px column, and
+  // because the span is absolutely positioned that overflow lands on the
+  // document rather than on the box — the whole page grows a horizontal
+  // scrollbar. Dividing the available width by the longest word keeps every
+  // letter on screen whatever the business turns out to be called, and 19vw
+  // stays the ceiling so a short name is still set large.
+  //
+  // 0.68 is the per-character width of this typeface at this weight, measured
+  // in the browser and rounded up: BAYANBOGD sits at 0.62em per character and
+  // CARWASH, with its wider letters, at 0.66em. The section clips anyway, so
+  // a name built entirely from Ws loses its edges instead of the page
+  // scrolling.
+  const longestWord = word.split(/\s+/).reduce((a, b) => (b.length > a.length ? b : a), "");
+  const wordmarkSize = `min(19vw, calc((min(72rem, 100vw) - 5rem) / ${(longestWord.length * 0.68).toFixed(2)}))`;
+
   return (
-    <section className="border-b border-border">
+    // overflow-hidden is the guarantee rather than the layout: whatever the
+    // sizing above leaves over bleeds to the viewport edge and stops there,
+    // so this section can never be the reason the page scrolls sideways.
+    <section className="overflow-hidden border-b border-border">
       <div className="mx-auto max-w-6xl px-5 pb-12 pt-10 md:px-10 md:pb-20 md:pt-16">
         <p className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">{dict.hero.eyebrow}</p>
 
         <div className="relative mt-8 flex justify-center md:mt-10">
           <span
             aria-hidden
-            className="pointer-events-none absolute inset-x-0 top-[12%] select-none text-center text-[19vw] font-bold leading-none tracking-tighter text-muted md:top-[18%]"
+            className="pointer-events-none absolute inset-x-0 top-[12%] select-none break-words text-center font-bold leading-none tracking-tighter text-muted md:top-[18%]"
+            style={{ fontSize: wordmarkSize }}
           >
             {word}
           </span>
