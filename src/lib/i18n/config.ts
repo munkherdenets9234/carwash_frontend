@@ -37,20 +37,3 @@ export function localePath(locale: Locale, path = ""): string {
   const suffix = path.replace(/^\/+/, "");
   return suffix ? `/${locale}/${suffix}` : `/${locale}`;
 }
-
-/**
- * Picks a locale from an Accept-Language header.
- *
- * Deliberately simple — two languages that share no prefix, so quality values
- * add nothing a first-match scan does not already get right. It runs once, on
- * `/`, before redirecting to a prefixed URL.
- */
-export function localeFromAcceptLanguage(header: string | null): Locale {
-  if (!header) return DEFAULT_LOCALE;
-  for (const part of header.split(",")) {
-    const tag = part.split(";")[0]?.trim().toLowerCase() ?? "";
-    if (tag.startsWith("mn")) return "mn";
-    if (tag.startsWith("en")) return "en";
-  }
-  return DEFAULT_LOCALE;
-}

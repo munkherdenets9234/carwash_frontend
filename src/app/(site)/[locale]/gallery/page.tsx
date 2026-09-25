@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { getSiteMedia } from "@/lib/api/site-media";
-import { getDictionary, hasLocale, LOCALE_TAGS, LOCALES, localePath } from "@/lib/i18n";
+import { DEFAULT_LOCALE, getDictionary, hasLocale, LOCALE_TAGS, LOCALES, localePath } from "@/lib/i18n";
 
 import { GalleryGrid } from "./_components/gallery-grid";
 
@@ -20,7 +20,12 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     description: dict.meta.galleryDescription,
     alternates: {
       canonical: localePath(locale, "gallery"),
-      languages: Object.fromEntries(LOCALES.map((l) => [LOCALE_TAGS[l], localePath(l, "gallery")])),
+      languages: {
+        ...Object.fromEntries(LOCALES.map((l) => [LOCALE_TAGS[l], localePath(l, "gallery")])),
+        // What a search engine should serve when it matches neither
+        // language. Same answer as `/` gives a visitor: Mongolian.
+        "x-default": localePath(DEFAULT_LOCALE, "gallery"),
+      },
     },
   };
 }

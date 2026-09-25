@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { getBusiness } from "@/lib/api/public";
-import { getDictionary, hasLocale, LOCALE_TAGS, LOCALES, localePath } from "@/lib/i18n";
+import { DEFAULT_LOCALE, getDictionary, hasLocale, LOCALE_TAGS, LOCALES, localePath } from "@/lib/i18n";
 
 import { SiteFooter } from "./_components/site-footer";
 import { SiteHeader } from "./_components/site-header";
@@ -29,7 +29,12 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       // hreflang alternates are the only thing that tells a search engine the
       // two URLs are the same page in different languages rather than
       // duplicate content competing with each other.
-      languages: Object.fromEntries(LOCALES.map((l) => [LOCALE_TAGS[l], localePath(l)])),
+      languages: {
+        ...Object.fromEntries(LOCALES.map((l) => [LOCALE_TAGS[l], localePath(l)])),
+        // What a search engine should serve when it matches neither
+        // language. Same answer as `/` gives a visitor: Mongolian.
+        "x-default": localePath(DEFAULT_LOCALE),
+      },
     },
     openGraph: {
       title: dict.meta.homeTitle,
