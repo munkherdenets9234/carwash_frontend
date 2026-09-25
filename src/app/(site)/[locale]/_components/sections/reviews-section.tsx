@@ -1,12 +1,14 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, Star } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useRef, useState } from "react";
 
 import { type Review, reviews } from "@/content/reviews";
 import { localized } from "@/content/site";
 import { type Dictionary, interpolate, type Locale } from "@/lib/i18n";
 import { cn, initialsOf } from "@/lib/utils";
+
+import { Rating } from "../rating";
 
 /**
  * The review carousel.
@@ -108,25 +110,6 @@ function ReviewCard({ review, locale, dict }: { review: Review; locale: Locale; 
         </button>
       </div>
     </li>
-  );
-}
-
-function Rating({ rating, label }: { rating: number; label: string }) {
-  return (
-    // One label for the group; the stars themselves are decoration. Five
-    // separate "star" announcements say nothing a number does not.
-    // role="img" so the label applies to the group: a bare span has no role
-    // for an aria-label to attach to, and five stars would otherwise be
-    // announced as five separate nothings.
-    <span role="img" className="flex items-center gap-0.5" aria-label={label} title={label}>
-      {[1, 2, 3, 4, 5].map((step) => (
-        <Star
-          key={step}
-          aria-hidden
-          className={cn("size-3.5", step <= rating ? "fill-primary text-primary" : "text-border")}
-        />
-      ))}
-    </span>
   );
 }
 

@@ -22,12 +22,12 @@ export const mn = {
     skipToContent: "Үндсэн хэсэг рүү шилжих",
   },
   hero: {
-    eyebrow: "Авто угаалга",
     bookCta: "Цаг захиалах",
-    bookHint: "Ойролцоогоор нэг минут",
-    scroll: "Үйлчилгээг харах",
-    galleryTitle: "Цомог",
-    galleryLink: "Ажлаа харуулъя",
+    callCta: "Утсаар холбогдох",
+    // Mongolian does not change the noun for the count, so both forms match.
+    ratingSummary: "{count} сэтгэгдэл",
+    ratingSummaryOne: "{count} сэтгэгдэл",
+    ratingLabel: "5-аас {rating} үнэлгээ",
   },
   services: {
     eyebrow: "Үйлчилгээ",

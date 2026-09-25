@@ -30,6 +30,31 @@ export const brand = {
   foundedYear: 1966,
 } as const;
 
+/**
+ * The hero headline, split into two pieces, and the line under it.
+ *
+ * Split because the second half is set in a lighter colour: one string with
+ * markup in it would either put HTML in a content file or force every
+ * language to break at the same word, and Mongolian does not put the emphasis
+ * where English does. Two plain strings let each language choose.
+ *
+ * Business copy, so it lives here rather than in the dictionaries: a manager
+ * rewording their own promise should not be editing UI labels.
+ */
+export const hero: {
+  headline: Record<Locale, { lead: string; muted: string }>;
+  subhead: Localized;
+} = {
+  headline: {
+    mn: { lead: "Дараалалгүй", muted: "авто угаалга" },
+    en: { lead: "A car wash", muted: "without the queue" },
+  },
+  subhead: {
+    mn: "Гадна, салон болон бүрэн арчилгаа. Онлайнаар цаг сонгоход таны машин товлосон минутдаа угаалгад орно.",
+    en: "Exterior, interior and full detailing. Pick a time online and your car goes in at the minute you booked.",
+  },
+};
+
 export const contact = {
   // TODO: real details. The phone number is the one fallback the site offers
   // when the API is unreachable, so it must be correct even if nothing else is.

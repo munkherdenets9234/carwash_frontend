@@ -20,12 +20,12 @@ export const en = {
     skipToContent: "Skip to content",
   },
   hero: {
-    eyebrow: "Car wash",
-    bookCta: "Book",
-    bookHint: "Takes about a minute",
-    scroll: "Scroll for services",
-    galleryTitle: "Gallery",
-    galleryLink: "See our work",
+    bookCta: "Book a wash",
+    callCta: "Call us",
+    // {count} rather than a bare number so a language can put the word first.
+    ratingSummary: "{count} reviews",
+    ratingSummaryOne: "{count} review",
+    ratingLabel: "Rated {rating} out of 5",
   },
   services: {
     eyebrow: "Services",
