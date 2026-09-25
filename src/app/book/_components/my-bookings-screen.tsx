@@ -51,30 +51,30 @@ export function MyBookingsScreen({ businessName }: { businessName?: string }) {
   return (
     <BookingShell
       businessName={businessName}
-      eyebrow="Your account"
-      title="Your bookings"
-      description="Everything booked with this account, in one place."
+      eyebrow="Таны бүртгэл"
+      title="Миний захиалгууд"
+      description="Энэ бүртгэлээр хийсэн бүх захиалга нэг дор."
       links={ACCOUNT_LINKS}
       headerAction={<SignOutButton compact />}
       footerNote={<AccountFooterNote />}
       aside={
         <Link href="/book/new" className={buttonVariants({ size: "lg" })}>
-          Book a wash
+          Захиалах
         </Link>
       }
     >
       <DataState
         query={bookings}
         isEmpty={() => rows.length === 0}
-        empty={{ title: "No bookings yet", description: "Book a wash and it will show up here." }}
+        empty={{ title: "Захиалга алга байна", description: "Захиалга хийвэл энд харагдана." }}
       >
         {() => (
           <div className="flex flex-col gap-12">
             <section className="flex flex-col gap-5">
-              <h2 className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">Upcoming</h2>
+              <h2 className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">Удахгүй болох</h2>
               {upcoming.length === 0 ? (
                 <p className="rounded-xl border border-dashed border-border px-6 py-10 text-sm text-muted-foreground">
-                  Nothing booked.
+                  Захиалга алга.
                 </p>
               ) : (
                 <ul className="grid gap-6 lg:grid-cols-2">
@@ -89,7 +89,7 @@ export function MyBookingsScreen({ businessName }: { businessName?: string }) {
 
             {past.length > 0 && (
               <section className="flex flex-col gap-5">
-                <h2 className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">Past</h2>
+                <h2 className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">Өнгөрсөн</h2>
                 <ul className="flex flex-col divide-y divide-border rounded-xl border border-border bg-card">
                   {past.map((booking) => (
                     <li key={booking.id} className="flex flex-wrap items-center gap-x-6 gap-y-2 px-6 py-4">
@@ -125,12 +125,12 @@ function UpcomingCard({ booking, onChanged }: { booking: Reservation; onChanged:
     setPending(true);
     try {
       await api.post(`customer/reservations/${booking.id}/cancel`);
-      toast.success("Booking cancelled");
+      toast.success("Захиалга цуцлагдлаа");
       onChanged();
     } catch (err) {
       // The backend refuses a cancellation that is too close to the start,
       // and says how close. That message is the useful part.
-      toast.error("Could not cancel", { description: errorMessage(err) });
+      toast.error("Цуцалж чадсангүй", { description: errorMessage(err) });
     } finally {
       setPending(false);
       setConfirming(false);
@@ -152,9 +152,9 @@ function UpcomingCard({ booking, onChanged }: { booking: Reservation; onChanged:
 
       <dl className="flex flex-col divide-y divide-border">
         {[
-          ["Employee", booking.employee.name ?? "—"],
-          ["Where", booking.location.name ?? "—"],
-          ["Car", booking.car.plate],
+          ["Ажилтан", booking.employee.name ?? "—"],
+          ["Байршил", booking.location.name ?? "—"],
+          ["Машин", booking.car.plate],
         ].map(([label, value]) => (
           <div key={label} className="flex gap-4 py-2.5 first:pt-0">
             <dt className="w-20 shrink-0 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
@@ -170,15 +170,15 @@ function UpcomingCard({ booking, onChanged }: { booking: Reservation; onChanged:
         {confirming ? (
           <div className="flex gap-1.5">
             <Button variant="destructive" size="sm" onClick={cancel} disabled={pending}>
-              {pending ? "…" : "Cancel it"}
+              {pending ? "…" : "Цуцлах"}
             </Button>
             <Button variant="ghost" size="sm" onClick={() => setConfirming(false)}>
-              Keep
+              Хадгалах
             </Button>
           </div>
         ) : (
           <Button variant="ghost" size="sm" onClick={() => setConfirming(true)}>
-            Cancel this booking
+            Захиалга цуцлах
           </Button>
         )}
       </div>

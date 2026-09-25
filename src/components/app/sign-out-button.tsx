@@ -30,7 +30,7 @@ export function SignOutButton({ className, compact }: { className?: string; comp
       className={cn("justify-start text-muted-foreground", className)}
     >
       <LogOut aria-hidden />
-      {pending ? "Signing out…" : "Sign out"}
+      {pending ? "Гарч байна…" : "Гарах"}
     </Button>
   );
 }

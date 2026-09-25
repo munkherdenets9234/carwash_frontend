@@ -2,7 +2,7 @@ import { Suspense } from "react";
 
 import { TimesheetsScreen } from "../_components/timesheets-screen";
 
-export const metadata = { title: "Timesheets · Car Wash" };
+export const metadata = { title: "Ирцийн бүртгэл · Car Wash" };
 
 export default function ManagerTimesheetsPage() {
   return (

@@ -2,7 +2,7 @@ import { Suspense } from "react";
 
 import { LoginForm } from "./_components/login-form";
 
-export const metadata = { title: "Sign in · Car Wash" };
+export const metadata = { title: "Нэвтрэх · Car Wash" };
 
 // A Server Component that composes one Client Component, per the reference's
 // convention: keep page.tsx thin and push interactivity down.
@@ -13,9 +13,9 @@ export default function LoginPage() {
         <div className="flex size-12 items-center justify-center rounded-xl border border-border bg-muted font-mono text-[11px] text-muted-foreground">
           CW
         </div>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight">Welcome back</h1>
+        <h1 className="mt-3 text-3xl font-bold tracking-tight">Тавтай морил</h1>
         <p className="text-sm text-muted-foreground">
-          One sign-in for customers, employees and managers. Where you land depends on your role.
+          Харилцагч, ажилтан, менежер бүгд энд нэвтэрнэ. Таны эрхээс шалтгаалж өөр өөр хуудас руу шилжинэ.
         </p>
       </div>
 

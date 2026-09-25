@@ -10,9 +10,9 @@ import { Field, Input } from "@/components/ui/field";
 import type { ApiEnvelope, Role } from "@/lib/api/types";
 
 const DEMO_ACCOUNTS: { label: string; email: string; password: string }[] = [
-  { label: "Manager", email: "manager@carwash.mn", password: "manager123" },
-  { label: "Employee", email: "bat@carwash.mn", password: "employee123" },
-  { label: "Customer", email: "customer@example.mn", password: "customer123" },
+  { label: "Менежер", email: "manager@carwash.mn", password: "manager123" },
+  { label: "Ажилтан", email: "bat@carwash.mn", password: "employee123" },
+  { label: "Харилцагч", email: "customer@example.mn", password: "customer123" },
 ];
 
 function homePathFor(role: Role) {
@@ -51,9 +51,13 @@ export function LoginForm() {
         // invites the user to keep hammering a locked door.
         if (res.status === 429) {
           const wait = res.headers.get("Retry-After");
-          setError(wait ? `Too many attempts. Try again in ${wait} seconds.` : "Too many attempts. Try again shortly.");
+          setError(
+            wait
+              ? `Хэт олон удаа оролдлоо. ${wait} секундын дараа дахин оролдоно уу.`
+              : "Хэт олон удаа оролдлоо. Түр хүлээгээд дахин оролдоно уу.",
+          );
         } else {
-          setError(envelope?.error?.message ?? "Could not sign in");
+          setError(envelope?.error?.message ?? "Нэвтэрч чадсангүй");
         }
         return;
       }
@@ -65,7 +69,7 @@ export function LoginForm() {
       router.replace(target);
       router.refresh();
     } catch {
-      setError("Could not reach the server");
+      setError("Серверт холбогдож чадсангүй");
     } finally {
       setPending(false);
     }
@@ -84,12 +88,12 @@ export function LoginForm() {
           role="alert"
           className="rounded-md border border-warning/30 bg-warning/10 px-4 py-3 text-[13px] text-warning"
         >
-          Your session ended. Sign in again to carry on.
+          Таны нэвтрэлт дууссан байна. Үргэлжлүүлэхийн тулд дахин нэвтэрнэ үү.
         </p>
       )}
 
       <form onSubmit={submit} className="flex flex-col gap-4">
-        <Field id="email" label="Email">
+        <Field id="email" label="Имэйл">
           <Input
             id="email"
             type="email"
@@ -100,7 +104,7 @@ export function LoginForm() {
           />
         </Field>
 
-        <Field id="password" label="Password">
+        <Field id="password" label="Нууц үг">
           <Input
             id="password"
             type="password"
@@ -118,7 +122,7 @@ export function LoginForm() {
         )}
 
         <Button type="submit" size="lg" disabled={pending}>
-          {pending ? "Signing in…" : "Sign in"}
+          {pending ? "Нэвтэрч байна…" : "Нэвтрэх"}
         </Button>
       </form>
 
@@ -127,19 +131,21 @@ export function LoginForm() {
           their history — and before this, nothing on the site linked to the
           signup page at all. */}
       <p className="text-center text-[13px] text-muted-foreground">
-        No account?{" "}
+        Бүртгэлгүй юу?{" "}
         <Link href="/register" className="font-medium text-foreground underline underline-offset-4">
-          Create one
+          Шинээр бүртгүүлэх
         </Link>{" "}
-        — or{" "}
+        — эсвэл{" "}
         <Link href="/book/find" className="font-medium text-foreground underline underline-offset-4">
-          find a booking with its code
+          захиалгаа кодоор нь олох
         </Link>
         .
       </p>
 
       <div className="flex flex-col gap-2 rounded-lg border border-dashed border-border p-4">
-        <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Demo accounts</span>
+        <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+          Жишээ бүртгэлүүд
+        </span>
         <div className="flex flex-wrap gap-2">
           {DEMO_ACCOUNTS.map((account) => (
             <Button key={account.email} variant="outline" size="sm" onClick={() => fill(account)}>

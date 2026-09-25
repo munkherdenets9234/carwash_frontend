@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
+import { ReservationBadge } from "@/components/app/status-badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
 import { api, errorMessage, hasCode } from "@/lib/api/client";
@@ -45,7 +46,7 @@ export function FindBookingScreen({ businessName }: { businessName?: string }) {
     } catch (err) {
       setError(
         hasCode(err, ErrorCode.NotFound)
-          ? "No booking matches that code and phone number. Check both — the code is eight characters, and the number has to be the one you booked with."
+          ? "Энэ код болон утасны дугаартай тохирох захиалга олдсонгүй. Хоёуланг нь шалгана уу — код найман тэмдэгттэй, дугаар нь захиалсан дугаар байх ёстой."
           : errorMessage(err),
       );
     } finally {
@@ -56,13 +57,13 @@ export function FindBookingScreen({ businessName }: { businessName?: string }) {
   return (
     <BookingShell
       businessName={businessName}
-      eyebrow="No account needed"
-      title="Find your booking"
-      description="Your booking code and the phone number you booked with."
+      eyebrow="Бүртгэл шаардлагагүй"
+      title="Захиалгаа хайх"
+      description="Захиалгын код болон захиалсан утасны дугаараа оруулна уу."
     >
       <div className="grid gap-10 lg:grid-cols-[22rem_1fr] lg:items-start">
         <form onSubmit={submit} className="flex flex-col gap-5">
-          <Field id="find-reference" label="Booking code" hint="The dash and capitals do not matter.">
+          <Field id="find-reference" label="Захиалгын код" hint="Зураас, том жижиг үсэг хамаагүй.">
             <Input
               id="find-reference"
               value={reference}
@@ -75,7 +76,7 @@ export function FindBookingScreen({ businessName }: { businessName?: string }) {
             />
           </Field>
 
-          <Field id="find-phone" label="Phone number" hint="The number you booked with.">
+          <Field id="find-phone" label="Утасны дугаар" hint="Захиалсан утасны дугаараа оруулна уу.">
             <Input
               id="find-phone"
               type="tel"
@@ -89,11 +90,11 @@ export function FindBookingScreen({ businessName }: { businessName?: string }) {
 
           <Button type="submit" size="lg" disabled={pending}>
             <Search aria-hidden className="size-4" />
-            {pending ? "Looking…" : "Find booking"}
+            {pending ? "Хайж байна…" : "Захиалга хайх"}
           </Button>
 
           <Link href="/book/new" className={buttonVariants({ variant: "ghost", size: "lg" })}>
-            Book a new wash
+            Шинэ захиалга хийх
           </Link>
         </form>
 
@@ -111,18 +112,16 @@ export function FindBookingScreen({ businessName }: { businessName?: string }) {
             <div className="rounded-xl border border-border bg-card">
               <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-border px-6 py-5">
                 <p className="font-mono text-2xl font-bold tracking-[0.12em]">{booking.reference}</p>
-                <p className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-                  {booking.status.replace(/_/g, " ")}
-                </p>
+                <ReservationBadge status={booking.status} />
               </div>
 
               <dl className="flex flex-col divide-y divide-border px-6">
                 {[
-                  ["Service", booking.service.name ?? "—"],
-                  ["Car", booking.car.plate],
-                  ["Employee", booking.employee.name ?? "—"],
-                  ["When", `${formatDay(booking.start_at)}, ${formatTime(booking.start_at)}`],
-                  ["Where", booking.location.name ?? "—"],
+                  ["Үйлчилгээ", booking.service.name ?? "—"],
+                  ["Машин", booking.car.plate],
+                  ["Ажилтан", booking.employee.name ?? "—"],
+                  ["Цаг", `${formatDay(booking.start_at)}, ${formatTime(booking.start_at)}`],
+                  ["Байршил", booking.location.name ?? "—"],
                 ].map(([label, value]) => (
                   <div key={label} className="flex gap-4 py-4">
                     <dt className="w-24 shrink-0 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
@@ -134,9 +133,7 @@ export function FindBookingScreen({ businessName }: { businessName?: string }) {
               </dl>
 
               <div className="flex items-baseline gap-3 border-t border-border bg-muted px-6 py-4">
-                <span className="flex-1 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-                  Price
-                </span>
+                <span className="flex-1 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">Үнэ</span>
                 <span className="text-2xl font-medium tabular-nums tracking-tight">{formatMNT(booking.price_mnt)}</span>
               </div>
             </div>
@@ -146,10 +143,10 @@ export function FindBookingScreen({ businessName }: { businessName?: string }) {
             // The empty state carries the one thing somebody who cannot find
             // their code actually needs, rather than decoration.
             <div className="rounded-xl border border-dashed border-border px-6 py-10 text-sm leading-relaxed text-muted-foreground">
-              <p>Your booking will appear here.</p>
+              <p>Таны захиалга энд харагдана.</p>
               <p className="mt-3">
-                Lost the code? We cannot send it again — it is the only thing that keeps a phone number from being
-                enough to read your booking. Call the number below and the business can look you up.
+                Кодоо алдсан уу? Бид үүнийг дахин илгээх боломжгүй — энэ нь утасны дугаараар захиалгыг уншиж болохгүй
+                байлгах цорын ганц зүйл. Доорх дугаараар холбогдвол бизнес тантай хамт хайж олно.
               </p>
             </div>
           )}

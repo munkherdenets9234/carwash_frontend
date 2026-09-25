@@ -2,7 +2,7 @@ import { Suspense } from "react";
 
 import { DailyReportScreen } from "./_components/daily-report-screen";
 
-export const metadata = { title: "Day report · Car Wash" };
+export const metadata = { title: "Өдрийн тайлан · Car Wash" };
 
 export default function ManagerHomePage() {
   return (

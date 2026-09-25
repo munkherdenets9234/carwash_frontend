@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useApi } from "@/hooks/use-api";
 import { useQueryParam } from "@/hooks/use-query-param";
 import type { DailyReport } from "@/lib/api/types";
-import { businessToday, formatHours, formatMNT } from "@/lib/utils";
+import { businessToday, formatDay, formatHours, formatMNT } from "@/lib/utils";
 
 export function DailyReportScreen() {
   const [day, setDay] = useQueryParam("day", businessToday());
@@ -17,13 +17,11 @@ export function DailyReportScreen() {
   return (
     <>
       <PageHeader
-        eyebrow={new Date(`${day}T00:00:00`).toLocaleDateString("en-GB", {
-          weekday: "long",
-          day: "numeric",
-          month: "long",
-        })}
-        title="Day report"
-        actions={<DayPicker value={day} onChange={setDay} label="Report day" />}
+        // formatDay, not toLocaleDateString("mn-MN") — see lib/utils.ts on
+        // why asking Intl for Mongolian words is not reliable across browsers.
+        eyebrow={formatDay(`${day}T00:00:00`)}
+        title="Өдрийн тайлан"
+        actions={<DayPicker value={day} onChange={setDay} label="Тайлангийн өдөр" />}
       />
 
       <div className="flex flex-col gap-6 p-6 sm:p-8">
@@ -31,29 +29,29 @@ export function DailyReportScreen() {
           {(report) => (
             <>
               <StatRow>
-                <Stat label="Washes" value={report.washes} />
-                <Stat label="Revenue" value={formatMNT(report.revenue_mnt)} />
-                <Stat label="Bonus owed" value={formatMNT(report.bonus_mnt)} />
-                <Stat label="Net" value={formatMNT(report.net_mnt)} emphasis />
+                <Stat label="Угаалга" value={report.washes} />
+                <Stat label="Орлого" value={formatMNT(report.revenue_mnt)} />
+                <Stat label="Өгөх урамшуулал" value={formatMNT(report.bonus_mnt)} />
+                <Stat label="Цэвэр дүн" value={formatMNT(report.net_mnt)} emphasis />
               </StatRow>
 
               <section className="flex flex-col gap-3">
-                <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">By employee</h2>
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Ажилтнаар</h2>
 
                 {report.employees.length === 0 ? (
                   <p className="rounded-lg border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
-                    Nobody worked and nothing was sold on this day.
+                    Энэ өдөр хэн ч ажиллаагүй, юу ч зарагдаагүй байна.
                   </p>
                 ) : (
                   <div className="rounded-lg border border-border">
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Employee</TableHead>
-                          <TableHead className="text-right">Washes</TableHead>
-                          <TableHead className="text-right">Revenue</TableHead>
-                          <TableHead className="text-right">Bonus</TableHead>
-                          <TableHead className="text-right">Hours</TableHead>
+                          <TableHead>Ажилтан</TableHead>
+                          <TableHead className="text-right">Угаалга</TableHead>
+                          <TableHead className="text-right">Орлого</TableHead>
+                          <TableHead className="text-right">Урамшуулал</TableHead>
+                          <TableHead className="text-right">Цаг</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -72,7 +70,7 @@ export function DailyReportScreen() {
                                   entry is still open. Saying so beats a bare
                                   0.0, which reads as "did not work". */}
                               {row.worked_minutes === 0 && row.washes > 0 ? (
-                                <span className="text-warning">still in</span>
+                                <span className="text-warning">ажиллаж байна</span>
                               ) : (
                                 formatHours(row.worked_hours)
                               )}
@@ -85,9 +83,9 @@ export function DailyReportScreen() {
                 )}
 
                 <p className="max-w-3xl text-[13px] leading-relaxed text-muted-foreground">
-                  Hours and washes are separate figures, neither derived from the other — a full shift with nothing sold
-                  is the row worth noticing. Amounts are what each wash was sold for at the time it was booked, so
-                  editing the price list never changes a day already reported.
+                  Цаг болон угаалгын тоо тус тусдаа бүртгэгдэнэ, нэгээс нь нөгөөг тооцдоггүй — юу ч зарагдаагүй бүтэн
+                  ээлж анхаарал татах ёстой мөр юм. Дүнгүүд нь захиалсан үеийн үнэ тул үнийн жагсаалтыг өөрчилсөн ч аль
+                  хэдийн тайлагдсан өдрийг өөрчлөхгүй.
                 </p>
               </section>
             </>

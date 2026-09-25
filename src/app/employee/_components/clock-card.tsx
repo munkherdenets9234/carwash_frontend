@@ -61,7 +61,7 @@ export function ClockCard({
 
   function locate() {
     if (!navigator.geolocation) {
-      setGeoError("This browser cannot report a location.");
+      setGeoError("Энэ хөтөч байршил тодорхойлж чадахгүй байна.");
       return;
     }
     setLocating(true);
@@ -74,8 +74,8 @@ export function ClockCard({
       (err) => {
         setGeoError(
           err.code === err.PERMISSION_DENIED
-            ? "Location permission was refused. Clock-in needs it."
-            : "No GPS fix yet. Step outside and try again.",
+            ? "Байршлын зөвшөөрөл өгөгдөөгүй байна. Ирц бүртгүүлэхийн тулд шаардлагатай."
+            : "GPS одоогоор олдсонгүй. Гадуур гарч дахин оролдоно уу.",
         );
         setLocating(false);
       },
@@ -95,16 +95,16 @@ export function ClockCard({
         lat: fix.lat,
         lng: fix.lng,
       });
-      toast.success("Clocked in", { description: `At ${site.name}.` });
+      toast.success("Ирц бүртгэгдлээ", { description: `${site.name}.` });
       onChanged();
     } catch (err) {
       // OUTSIDE_GEOFENCE carries the measured distance in its message, which
       // is more useful than anything this screen could say, so it is shown
       // as-is rather than replaced.
       if (hasCode(err, ErrorCode.OutsideGeofence)) {
-        toast.error("Too far from the site", { description: errorMessage(err) });
+        toast.error("Байршлаас хэт хол байна", { description: errorMessage(err) });
       } else {
-        toast.error("Could not clock in", { description: errorMessage(err) });
+        toast.error("Ирц бүртгэж чадсангүй", { description: errorMessage(err) });
       }
     } finally {
       setPending(false);
@@ -121,10 +121,10 @@ export function ClockCard({
         lat: fix?.lat ?? 0,
         lng: fix?.lng ?? 0,
       });
-      toast.success("Clocked out", { description: "Your hours are on today's timesheet." });
+      toast.success("Гарсан цаг бүртгэгдлээ", { description: "Таны ажилласан цаг өнөөдрийн бүртгэлд орлоо." });
       onChanged();
     } catch (err) {
-      toast.error("Could not clock out", { description: errorMessage(err) });
+      toast.error("Гарсан цаг бүртгэж чадсангүй", { description: errorMessage(err) });
     } finally {
       setPending(false);
     }
@@ -137,18 +137,18 @@ export function ClockCard({
           <div className="flex items-center gap-2.5 rounded-md border border-primary/30 bg-accent px-3 py-2.5">
             <CheckCircle2 aria-hidden className="size-4 text-accent-foreground" />
             <span className="flex-1 text-[13px] text-accent-foreground">
-              Clocked in at <strong>{formatTime(current.clock_in_at)}</strong> · {current.location.name}
+              Ирц бүртгүүлсэн цаг: <strong>{formatTime(current.clock_in_at)}</strong> · {current.location.name}
             </span>
           </div>
           <p className="text-[13px] text-muted-foreground">
-            Recorded {formatDistance(current.clock_in_distance_m)} from the site.
+            Байршлаас {formatDistance(current.clock_in_distance_m)} зайд бүртгэгдсэн.
           </p>
           <Button variant="outline" size="lg" onClick={clockOut} disabled={pending}>
-            {pending ? "Clocking out…" : "Clock out"}
+            {pending ? "Гарч байна…" : "Ажлаас гарах"}
           </Button>
           <p className="text-xs leading-relaxed text-muted-foreground">
-            Clocking out is never refused for being away from the site — the distance is recorded instead, so nobody
-            stays on the clock after going home.
+            Байршлаас хол байгаа тул ажлаас гарахыг татгалзахгүй — харин зайг нь тэмдэглэнэ, ингэснээр хэн ч гэртээ
+            харьсны дараа ирцтэй үлдэхгүй.
           </p>
         </CardContent>
       </Card>
@@ -160,7 +160,7 @@ export function ClockCard({
       <CardContent className="flex flex-col gap-4 pt-5">
         {locations.length > 1 && (
           <Select
-            aria-label="Site"
+            aria-label="Байршил"
             value={site?.id ?? ""}
             onChange={(e) => {
               setSiteId(e.target.value);
@@ -179,14 +179,14 @@ export function ClockCard({
           <div className="flex items-start gap-2.5 text-[13px] text-muted-foreground">
             <MapPin aria-hidden className="mt-0.5 size-4 shrink-0" />
             <span>
-              {site.name} · clock-in allowed within {formatDistance(site.geofence_radius_m)}
+              {site.name} · ирц {formatDistance(site.geofence_radius_m)} зайд бүртгэгдэнэ
             </span>
           </div>
         )}
 
         {!fix && (
           <Button size="lg" onClick={locate} disabled={locating}>
-            {locating ? "Finding you…" : "Check my location"}
+            {locating ? "Байршил тодорхойлж байна…" : "Байршлаа шалгах"}
           </Button>
         )}
 
@@ -212,20 +212,22 @@ export function ClockCard({
                 <AlertTriangle aria-hidden className="size-4 text-warning" />
               )}
               <span className={withinFence ? "text-[13px] text-accent-foreground" : "text-[13px] text-warning"}>
-                You are <strong>{formatDistance(distance)}</strong> from the site
-                {withinFence ? "" : ` — clock-in needs ${formatDistance(site.geofence_radius_m)}`}
+                Та байршлаас <strong>{formatDistance(distance)}</strong> зайд байна
+                {withinFence
+                  ? ""
+                  : ` — ирц бүртгүүлэхэд ${formatDistance(site.geofence_radius_m)} дотор байх шаардлагатай`}
               </span>
             </div>
             <p className="text-xs text-muted-foreground">
-              Your phone reports this fix as ±{Math.round(fix.accuracy)} m.
+              Таны утас энэ байршлыг ±{Math.round(fix.accuracy)} м нарийвчлалтай гэж мэдээлж байна.
             </p>
 
             <div className="flex gap-2">
               <Button className="flex-1" size="lg" onClick={clockIn} disabled={pending}>
-                {pending ? "Clocking in…" : "Clock in"}
+                {pending ? "Бүртгэж байна…" : "Ирц бүртгүүлэх"}
               </Button>
               <Button variant="outline" size="lg" onClick={locate} disabled={locating}>
-                Recheck
+                Дахин шалгах
               </Button>
             </div>
           </>
@@ -237,7 +239,7 @@ export function ClockCard({
             onClick={() => setFix({ lat: site.lat, lng: site.lng, accuracy: 5 })}
             className="rounded-md border border-dashed border-border px-3 py-2.5 font-mono text-[11px] text-muted-foreground"
           >
-            Demo only: pretend I am standing at {site.name}
+            Зөвхөн жишээ: {site.name} дээр байгаа мэт харуулах
           </button>
         )}
       </CardContent>

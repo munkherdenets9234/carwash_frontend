@@ -16,7 +16,7 @@ function Frame({ className, children }: { className?: string; children: ReactNod
   );
 }
 
-export function LoadingState({ label = "Loading" }: { label?: string }) {
+export function LoadingState({ label = "Ачааллаж байна" }: { label?: string }) {
   return (
     // role=status so a screen reader announces the wait instead of sitting in
     // silence; aria-live=polite keeps it from interrupting.
@@ -43,11 +43,13 @@ export function ErrorState({ message, onRetry }: { message: string; onRetry?: ()
   return (
     <Frame className="border-destructive/40">
       <AlertTriangle aria-hidden className="size-5 text-destructive" />
-      <p className="text-sm font-medium">Could not load this</p>
+      <p className="text-sm font-medium">Ачаалж чадсангүй</p>
+      {/* message comes from the API and stays as the backend sent it — the
+          backend's own error text is not part of this translation pass. */}
       <p className="max-w-sm text-[13px] text-muted-foreground">{message}</p>
       {onRetry && (
         <button type="button" onClick={onRetry} className="mt-1 text-[13px] font-semibold text-primary underline">
-          Try again
+          Дахин оролдох
         </button>
       )}
     </Frame>
@@ -58,9 +60,9 @@ export function ForbiddenState() {
   return (
     <Frame>
       <ShieldOff aria-hidden className="size-5 text-muted-foreground" />
-      <p className="text-sm font-medium">Not available to your account</p>
+      <p className="text-sm font-medium">Таны эрхээр хандах боломжгүй</p>
       <p className="max-w-sm text-[13px] text-muted-foreground">
-        Your role does not include this. Nothing is wrong with the request — ask a manager if you need access.
+        Таны эрх үүнийг хамрахгүй байна. Хүсэлтэд ямар нэг асуудал алга — хандах шаардлагатай бол менежерээс лавлаарай.
       </p>
     </Frame>
   );
@@ -80,10 +82,10 @@ export function PlanLimitedState({ message }: { message?: string }) {
   return (
     <Frame>
       <ShieldOff aria-hidden className="size-5 text-muted-foreground" />
-      <p className="text-sm font-medium">Not included in this plan</p>
+      <p className="text-sm font-medium">Энэ багцад багтаагүй</p>
       <p className="max-w-sm text-[13px] text-muted-foreground">
-        {message ?? "This business's subscription does not cover this."} Nothing is wrong with the request — it needs a
-        change to the subscription rather than to your account.
+        {message ?? "Энэ бизнесийн багц үүнийг хамардаггүй."} Хүсэлтэд ямар нэг асуудал алга — эрхээ өөрчлөх биш, багцаа
+        өөрчлөх шаардлагатай.
       </p>
     </Frame>
   );
@@ -122,8 +124,7 @@ export function DataState<T>({
   if (query.forbidden) return <ForbiddenState />;
   if (query.error) return <ErrorState message={query.error} onRetry={query.refresh} />;
   if (query.loading && query.data === undefined) return <LoadingState />;
-  if (query.data === undefined) return <EmptyState title={empty?.title ?? "Nothing here"} />;
-  if (isEmpty?.(query.data))
-    return <EmptyState title={empty?.title ?? "Nothing here"} description={empty?.description} />;
+  if (query.data === undefined) return <EmptyState title={empty?.title ?? "Юу ч алга"} />;
+  if (isEmpty?.(query.data)) return <EmptyState title={empty?.title ?? "Юу ч алга"} description={empty?.description} />;
   return <>{children(query.data)}</>;
 }

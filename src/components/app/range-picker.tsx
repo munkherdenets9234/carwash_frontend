@@ -21,9 +21,9 @@ export function RangePicker({
   const today = businessToday();
 
   const presets = [
-    { label: "Today", from: today, to: today },
-    { label: "7 days", from: addDays(today, -6), to: today },
-    { label: "30 days", from: addDays(today, -29), to: today },
+    { label: "Өнөөдөр", from: today, to: today },
+    { label: "7 хоног", from: addDays(today, -6), to: today },
+    { label: "30 хоног", from: addDays(today, -29), to: today },
   ];
 
   return (
@@ -44,7 +44,7 @@ export function RangePicker({
       })}
       <Input
         type="date"
-        aria-label="From"
+        aria-label="Эхлэх огноо"
         value={from}
         max={to}
         onChange={(e) => onChange({ from: e.target.value || today, to })}
@@ -52,7 +52,7 @@ export function RangePicker({
       />
       <Input
         type="date"
-        aria-label="To"
+        aria-label="Дуусах огноо"
         value={to}
         min={from}
         onChange={(e) => onChange({ from, to: e.target.value || today })}

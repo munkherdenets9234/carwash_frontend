@@ -17,7 +17,7 @@ import { addDays, businessToday } from "@/lib/utils";
 export function DayPicker({
   value,
   onChange,
-  label = "Day",
+  label = "Өдөр",
 }: {
   value: string;
   onChange: (day: string) => void;
@@ -27,7 +27,7 @@ export function DayPicker({
 
   return (
     <div className="flex items-center gap-1.5">
-      <Button variant="outline" size="icon" aria-label="Previous day" onClick={() => onChange(addDays(value, -1))}>
+      <Button variant="outline" size="icon" aria-label="Өмнөх өдөр" onClick={() => onChange(addDays(value, -1))}>
         <ChevronLeft aria-hidden />
       </Button>
       <Input
@@ -37,12 +37,12 @@ export function DayPicker({
         onChange={(e) => onChange(e.target.value || today)}
         className="w-[9.5rem]"
       />
-      <Button variant="outline" size="icon" aria-label="Next day" onClick={() => onChange(addDays(value, 1))}>
+      <Button variant="outline" size="icon" aria-label="Дараагийн өдөр" onClick={() => onChange(addDays(value, 1))}>
         <ChevronRight aria-hidden />
       </Button>
       {value !== today && (
         <Button variant="ghost" size="sm" onClick={() => onChange(today)}>
-          Today
+          Өнөөдөр
         </Button>
       )}
     </div>

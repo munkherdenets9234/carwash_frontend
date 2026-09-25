@@ -121,11 +121,19 @@ export const api = {
   upload,
 };
 
-/** Human-readable message for a toast. */
+/**
+ * Human-readable message for a toast.
+ *
+ * The ApiError and Error branches return whatever the backend or the
+ * runtime produced — still English, since translating the API's own error
+ * text is a separate, backend-side change this pass does not make. Only the
+ * final fallback, for a thrown value that is neither, is this file's own
+ * text and gets translated.
+ */
 export function errorMessage(err: unknown): string {
   if (err instanceof ApiError) return err.message;
   if (err instanceof Error) return err.message;
-  return "Something went wrong";
+  return "Тодорхойгүй алдаа гарлаа";
 }
 
 /**

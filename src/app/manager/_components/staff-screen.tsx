@@ -16,6 +16,17 @@ import { useApi } from "@/hooks/use-api";
 import { api, errorMessage } from "@/lib/api/client";
 import type { Location, Role, StaffMember, UserStatus } from "@/lib/api/types";
 
+// Every ROLE this table can show, not only the one it used to special-case.
+// {person.role} alone would leak the raw wire value ("manager", "customer")
+// for the two rows the old code did not name — the same class of bug as an
+// unlabelled status enum, just on a field nobody had tried the other tab to
+// notice.
+const ROLE_LABEL: Record<Role, string> = {
+  employee: "Ажилтан",
+  manager: "Менежер",
+  customer: "Харилцагч",
+};
+
 export function StaffScreen() {
   const staff = useApi<StaffMember[]>("manager/staff");
   const customers = useApi<StaffMember[]>("manager/customers");
@@ -27,9 +38,9 @@ export function StaffScreen() {
   return (
     <>
       <PageHeader
-        title="People"
+        title="Хүмүүс"
         actions={
-          <div role="tablist" aria-label="Which people" className="flex gap-1.5">
+          <div role="tablist" aria-label="Ямар хүмүүс" className="flex gap-1.5">
             <Button
               role="tab"
               aria-selected={tab === "staff"}
@@ -37,7 +48,7 @@ export function StaffScreen() {
               size="sm"
               onClick={() => setTab("staff")}
             >
-              Staff
+              Ажилтнууд
             </Button>
             <Button
               role="tab"
@@ -46,7 +57,7 @@ export function StaffScreen() {
               size="sm"
               onClick={() => setTab("customers")}
             >
-              Customers
+              Харилцагчид
             </Button>
           </div>
         }
@@ -54,16 +65,16 @@ export function StaffScreen() {
 
       <div className="flex flex-col gap-6 p-6 sm:p-8 xl:flex-row">
         <div className="min-w-0 flex-1">
-          <DataState query={active} isEmpty={(rows) => rows.length === 0} empty={{ title: "Nobody here yet" }}>
+          <DataState query={active} isEmpty={(rows) => rows.length === 0} empty={{ title: "Одоогоор хэн ч алга" }}>
             {(rows) => (
               <div className="rounded-lg border border-border">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Contact</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead>Нэр</TableHead>
+                      <TableHead>Эрх</TableHead>
+                      <TableHead>Холбоо барих</TableHead>
+                      <TableHead>Төлөв</TableHead>
                       <TableHead />
                     </TableRow>
                   </TableHeader>
@@ -72,7 +83,7 @@ export function StaffScreen() {
                       <TableRow key={person.id}>
                         <TableCell className="font-semibold">{person.name}</TableCell>
                         <TableCell>
-                          <Badge>{person.role === "employee" ? "Employee" : person.role}</Badge>
+                          <Badge>{ROLE_LABEL[person.role]}</Badge>
                         </TableCell>
                         <TableCell className="text-[13px] text-muted-foreground">
                           <span className="block">{person.email}</span>
@@ -107,17 +118,17 @@ function StatusButton({ person, onChanged }: { person: StaffMember; onChanged: (
     setPending(true);
     try {
       await api.put(`manager/staff/${person.id}/status`, { status: next });
-      toast.success(next === "suspended" ? "Suspended" : "Reinstated", {
+      toast.success(next === "suspended" ? "Түдгэлзүүллээ" : "Сэргээлээ", {
         description:
           next === "suspended"
-            ? "Their existing session stops working on the next request."
-            : `${person.name} can sign in again.`,
+            ? "Тэдний одоогийн нэвтрэлт дараагийн хүсэлтээс ажиллахгүй болно."
+            : `${person.name} дахин нэвтрэх боломжтой боллоо.`,
       });
       onChanged();
     } catch (err) {
       // The API refuses a manager suspending themselves (422). Its message
       // explains why, so it is passed through.
-      toast.error("Could not change that", { description: errorMessage(err) });
+      toast.error("Өөрчилж чадсангүй", { description: errorMessage(err) });
     } finally {
       setPending(false);
     }
@@ -125,7 +136,7 @@ function StatusButton({ person, onChanged }: { person: StaffMember; onChanged: (
 
   return (
     <Button variant="outline" size="sm" disabled={pending} onClick={change}>
-      {next === "suspended" ? "Suspend" : "Reinstate"}
+      {next === "suspended" ? "Түдгэлзүүлэх" : "Сэргээх"}
     </Button>
   );
 }
@@ -152,14 +163,14 @@ function AddStaffPanel({ locations, onAdded }: { locations: Location[]; onAdded:
         password,
         home_location_id: role === "employee" ? site : undefined,
       });
-      toast.success("Account created", { description: `${name} can sign in now.` });
+      toast.success("Бүртгэл үүслээ", { description: `${name} одоо нэвтрэх боломжтой.` });
       setName("");
       setEmail("");
       setPhone("");
       setPassword("");
       onAdded();
     } catch (err) {
-      toast.error("Could not create the account", { description: errorMessage(err) });
+      toast.error("Бүртгэл үүсгэж чадсангүй", { description: errorMessage(err) });
     } finally {
       setPending(false);
     }
@@ -168,21 +179,21 @@ function AddStaffPanel({ locations, onAdded }: { locations: Location[]; onAdded:
   return (
     <Card className="h-fit w-full shrink-0 xl:w-80">
       <CardHeader>
-        <CardTitle>Add a person</CardTitle>
+        <CardTitle>Хүн нэмэх</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <Field id="staff-role" label="Role">
+        <Field id="staff-role" label="Эрх">
           <Select id="staff-role" value={role} onChange={(e) => setRole(e.target.value as Exclude<Role, "customer">)}>
-            <option value="employee">Employee</option>
-            <option value="manager">Manager</option>
+            <option value="employee">Ажилтан</option>
+            <option value="manager">Менежер</option>
           </Select>
         </Field>
 
-        <Field id="staff-name" label="Name">
+        <Field id="staff-name" label="Нэр">
           <Input id="staff-name" value={name} onChange={(e) => setName(e.target.value)} autoComplete="off" />
         </Field>
 
-        <Field id="staff-email" label="Email">
+        <Field id="staff-email" label="Имэйл">
           <Input
             id="staff-email"
             type="email"
@@ -192,11 +203,11 @@ function AddStaffPanel({ locations, onAdded }: { locations: Location[]; onAdded:
           />
         </Field>
 
-        <Field id="staff-phone" label="Phone">
+        <Field id="staff-phone" label="Утас">
           <Input id="staff-phone" value={phone} onChange={(e) => setPhone(e.target.value)} autoComplete="off" />
         </Field>
 
-        <Field id="staff-password" label="Temporary password" hint="At least 8 characters.">
+        <Field id="staff-password" label="Түр нууц үг" hint="Хамгийн багадаа 8 тэмдэгт.">
           <Input
             id="staff-password"
             type="password"
@@ -207,7 +218,7 @@ function AddStaffPanel({ locations, onAdded }: { locations: Location[]; onAdded:
         </Field>
 
         {role === "employee" && (
-          <Field id="staff-site" label="Home site">
+          <Field id="staff-site" label="Байнгын ажлын байршил">
             <Select id="staff-site" value={site} onChange={(e) => setLocationId(e.target.value)}>
               {locations.map((location) => (
                 <option key={location.id} value={location.id}>
@@ -219,12 +230,12 @@ function AddStaffPanel({ locations, onAdded }: { locations: Location[]; onAdded:
         )}
 
         <Button onClick={create} disabled={pending || !name || !email || password.length < 8}>
-          {pending ? "Creating…" : "Create account"}
+          {pending ? "Үүсгэж байна…" : "Бүртгэл үүсгэх"}
         </Button>
 
         <p className="text-xs leading-relaxed text-muted-foreground">
-          Only employees and managers are created here. Customers sign themselves up — an account with a password
-          someone else chose is not one they agreed to.
+          Энд зөвхөн ажилтан, менежер бүртгэгддэг. Харилцагчид өөрсдөө бүртгүүлдэг — өөр хүний сонгосон нууц үгтэй
+          бүртгэл тэдний зөвшөөрсөн зүйл биш юм.
         </p>
       </CardContent>
     </Card>

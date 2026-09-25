@@ -26,7 +26,7 @@ import { RegisterForm } from "./register-form";
 
 type Step = "service" | "when" | "confirm" | "done";
 
-const STEP_LABELS = ["Service", "Time", "Details"];
+const STEP_LABELS = ["Үйлчилгээ", "Цаг", "Мэдээлэл"];
 
 /**
  * Booking a wash without an account, in the public site's visual language.
@@ -99,11 +99,11 @@ export function BookingFlow({ businessName }: { businessName?: string }) {
     // Checked here as well as on the server, because a server refusal arrives
     // after a round trip and this one does not.
     if (!plate.trim()) {
-      toast.error("Which car should we wash?");
+      toast.error("Ямар машиныг угаах вэ?");
       return;
     }
     if (!phone.trim()) {
-      toast.error("A phone number is needed, so the business can reach you.");
+      toast.error("Утасны дугаар шаардлагатай, ингэснээр бид тантай холбогдох боломжтой.");
       return;
     }
 
@@ -126,12 +126,12 @@ export function BookingFlow({ businessName }: { businessName?: string }) {
       // confirming — which is exactly what the server-side re-check is for.
       // Sending the visitor back to the slot list is the only useful move.
       if (hasCode(err, ErrorCode.SlotUnavailable)) {
-        toast.error("That time just went", { description: errorMessage(err) });
+        toast.error("Тэр цаг сая дүүрлээ", { description: errorMessage(err) });
         setPick(undefined);
         setStep("when");
         availability.refresh();
       } else {
-        toast.error("Could not book", { description: errorMessage(err) });
+        toast.error("Захиалж чадсангүй", { description: errorMessage(err) });
       }
     } finally {
       setPending(false);
@@ -144,13 +144,13 @@ export function BookingFlow({ businessName }: { businessName?: string }) {
   const stepIndex = step === "service" ? 0 : step === "when" ? 1 : 2;
   const heading =
     step === "service"
-      ? { title: "Choose a service", description: "Prices are fixed when you book. No account needed." }
+      ? { title: "Үйлчилгээ сонгох", description: "Захиалахад үнэ тогтмол болно. Бүртгэл шаардлагагүй." }
       : step === "when"
         ? {
-            title: "Pick who does it, and when",
-            description: "Only the people actually rostered that day appear here.",
+            title: "Хэн хийхийг болон цагийг сонгох",
+            description: "Тухайн өдөр хуваарьтай ажилтнууд л энд харагдана.",
           }
-        : { title: "Your details", description: "A number plate and a phone number. Nothing else." };
+        : { title: "Таны мэдээлэл", description: "Машины дугаар болон утасны дугаар. Өөр юу ч шаардлагагүй." };
 
   return (
     <BookingShell
@@ -162,7 +162,7 @@ export function BookingFlow({ businessName }: { businessName?: string }) {
         step !== "service" ? (
           <Button variant="outline" onClick={() => setStep(step === "confirm" ? "when" : "service")}>
             <ArrowLeft aria-hidden className="size-4" />
-            Back
+            Буцах
           </Button>
         ) : undefined
       }
@@ -171,7 +171,11 @@ export function BookingFlow({ businessName }: { businessName?: string }) {
         <StepRail step={stepIndex} labels={STEP_LABELS} />
 
         {step === "service" && (
-          <DataState query={services} isEmpty={(rows) => rows.length === 0} empty={{ title: "No services offered" }}>
+          <DataState
+            query={services}
+            isEmpty={(rows) => rows.length === 0}
+            empty={{ title: "Одоогоор үйлчилгээ байхгүй байна" }}
+          >
             {(rows) => (
               <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {rows.map((option) => (
@@ -193,7 +197,7 @@ export function BookingFlow({ businessName }: { businessName?: string }) {
                       </div>
 
                       <div className="flex flex-wrap gap-2">
-                        <Pill>{option.duration_min} min</Pill>
+                        <Pill>{option.duration_min} мин</Pill>
                         <Pill>{formatMNT(option.price_mnt)}</Pill>
                       </div>
 
@@ -201,7 +205,7 @@ export function BookingFlow({ businessName }: { businessName?: string }) {
                         className={cn(buttonVariants({ variant: "outline" }), "mt-auto w-full justify-center")}
                         aria-hidden
                       >
-                        Choose
+                        Сонгох
                       </span>
                     </button>
                   </li>
@@ -214,9 +218,9 @@ export function BookingFlow({ businessName }: { businessName?: string }) {
         {step === "when" && service && (
           <div className="flex flex-col gap-8">
             <div className="grid gap-4 sm:grid-cols-2 lg:max-w-xl">
-              <Field id="which-site" label="Site">
+              <Field id="which-site" label="Байршил">
                 <Select id="which-site" value={locationId} onChange={(e) => setLocationId(e.target.value)}>
-                  <option value="">Any site</option>
+                  <option value="">Дурын байршил</option>
                   {(locations.data ?? []).map((location) => (
                     <option key={location.id} value={location.id}>
                       {location.name}
@@ -224,7 +228,7 @@ export function BookingFlow({ businessName }: { businessName?: string }) {
                   ))}
                 </Select>
               </Field>
-              <Field id="which-day" label="Day">
+              <Field id="which-day" label="Өдөр">
                 <Input id="which-day" type="date" value={day} min={today} onChange={(e) => setDay(e.target.value)} />
               </Field>
             </div>
@@ -233,8 +237,8 @@ export function BookingFlow({ businessName }: { businessName?: string }) {
               query={availability}
               isEmpty={(rows) => rows.length === 0}
               empty={{
-                title: "Nobody is working that day",
-                description: "Try another day — the roster decides what can be booked.",
+                title: "Тэр өдөр хэн ч ажиллахгүй",
+                description: "Өөр өдөр сонгоно уу — хуваарь захиалгыг тодорхойлно.",
               }}
             >
               {(rows) => (
@@ -254,9 +258,7 @@ export function BookingFlow({ businessName }: { businessName?: string }) {
                             {/* An empty slot list is a real answer: working,
                                 but nothing left. Someone not rostered simply
                                 is not in this list at all. */}
-                            {entry.slots.length === 0
-                              ? "Fully booked"
-                              : `${entry.slots.length} ${entry.slots.length === 1 ? "slot" : "slots"} free`}
+                            {entry.slots.length === 0 ? "Дүүрсэн" : `${entry.slots.length} цаг сул байна`}
                           </span>
                         </div>
                       </div>
@@ -299,16 +301,16 @@ export function BookingFlow({ businessName }: { businessName?: string }) {
             <div className="flex flex-col gap-6 lg:order-2">
               <SummaryCard
                 rows={[
-                  ["Service", `${service.name} · ${service.duration_min} min`],
-                  ["Employee", pick.employeeName],
-                  ["When", `${formatDay(pick.startAt)}, ${formatTime(pick.startAt)}`],
-                  ["Where", (locations.data ?? []).find((l) => l.id === pick.locationId)?.name ?? "—"],
+                  ["Үйлчилгээ", `${service.name} · ${service.duration_min} мин`],
+                  ["Ажилтан", pick.employeeName],
+                  ["Цаг", `${formatDay(pick.startAt)}, ${formatTime(pick.startAt)}`],
+                  ["Байршил", (locations.data ?? []).find((l) => l.id === pick.locationId)?.name ?? "—"],
                 ]}
                 total={formatMNT(service.price_mnt)}
               />
               <p className="text-[13px] leading-relaxed text-muted-foreground">
-                This price is fixed now and stored with the booking. Later changes to the price list will not alter what
-                you were quoted.
+                Энэ үнэ захиалгын үед тогтмол болж хадгалагдана. Дараа нь үнийн жагсаалт өөрчлөгдсөн ч танд өгсөн үнэ
+                өөрчлөгдөхгүй.
               </p>
             </div>
 
@@ -318,7 +320,7 @@ export function BookingFlow({ businessName }: { businessName?: string }) {
                   business reaches you and half of how you find this booking
                   again. */}
               <div className="grid gap-5 sm:grid-cols-2">
-                <Field id="guest-plate" label="Number plate" hint="Which car we should wash.">
+                <Field id="guest-plate" label="Машины дугаар" hint="Аль машиныг угаах вэ.">
                   <Input
                     id="guest-plate"
                     value={plate}
@@ -330,7 +332,7 @@ export function BookingFlow({ businessName }: { businessName?: string }) {
                   />
                 </Field>
 
-                <Field id="guest-phone" label="Phone number" hint="So we can reach you about this booking.">
+                <Field id="guest-phone" label="Утасны дугаар" hint="Энэ захиалгын талаар тантай холбогдохын тулд.">
                   <Input
                     id="guest-phone"
                     type="tel"
@@ -343,25 +345,25 @@ export function BookingFlow({ businessName }: { businessName?: string }) {
                 </Field>
               </div>
 
-              <Field id="guest-name" label="Your name" hint="Optional.">
+              <Field id="guest-name" label="Таны нэр" hint="Заавал биш.">
                 <Input id="guest-name" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" />
               </Field>
 
-              <Field id="booking-notes" label="Anything we should know?">
+              <Field id="booking-notes" label="Бидэнд мэдэгдэх зүйл байна уу?">
                 <Textarea
                   id="booking-notes"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Optional"
+                  placeholder="Заавал биш"
                 />
               </Field>
 
               <Button size="lg" onClick={confirm} disabled={pending} className="sm:w-fit sm:px-8">
-                {pending ? "Booking…" : "Confirm booking"}
+                {pending ? "Захиалж байна…" : "Захиалгыг баталгаажуулах"}
               </Button>
 
               <p className="text-[13px] text-muted-foreground">
-                No account needed — you will get a booking code on the next screen.
+                Бүртгэл шаардлагагүй — дараагийн дэлгэцэд захиалгын код авах болно.
               </p>
             </div>
           </div>
@@ -394,7 +396,7 @@ function SummaryCard({ rows, total }: { rows: [string, string][]; total?: string
       </dl>
       {total && (
         <div className="flex items-baseline gap-3 border-t border-border bg-muted px-6 py-4">
-          <span className="flex-1 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">Total</span>
+          <span className="flex-1 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">Нийт дүн</span>
           <span className="text-2xl font-medium tabular-nums tracking-tight">{total}</span>
         </div>
       )}
@@ -440,51 +442,49 @@ function BookedScreen({
       // insecure origin, a browser that wants a user gesture it did not see.
       // The code is on the screen either way, so this is a non-event and must
       // not be dressed up as a failed booking.
-      toast.message("Copy it down", { description: booking.reference });
+      toast.message("Тэмдэглэж аваарай", { description: booking.reference });
     }
   }
 
   return (
     <BookingShell
       businessName={businessName}
-      eyebrow="Confirmed"
-      title="Booked"
-      description="Write the code down — you will need it, with your phone number, to find this booking again."
+      eyebrow="Баталгаажлаа"
+      title="Захиалагдлаа"
+      description="Кодоо тэмдэглэж авна уу — дараа нь утасны дугаартайгаа хамт хэрэглэж захиалгаа олох боломжтой."
     >
       <div className="grid gap-8 lg:grid-cols-[1fr_22rem] lg:items-start">
         <div className="flex flex-col items-center gap-5 rounded-xl border border-border bg-card px-6 py-12 text-center">
           <span className="flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
             <Check aria-hidden className="size-6" />
           </span>
-          <p className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">Your booking code</p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">Таны захиалгын код</p>
           <p className="font-mono text-4xl font-bold tracking-[0.12em] md:text-6xl">{booking.reference}</p>
           <Button variant="outline" onClick={copy}>
             <Copy aria-hidden className="size-4" />
-            {copied ? "Copied" : "Copy code"}
+            {copied ? "Хууллаа" : "Кодыг хуулах"}
           </Button>
-          <p className="max-w-sm text-[13px] leading-relaxed text-muted-foreground">
-            We cannot send it to you a second time.
-          </p>
+          <p className="max-w-sm text-[13px] leading-relaxed text-muted-foreground">Үүнийг дахин илгээх боломжгүй.</p>
         </div>
 
         <div className="flex flex-col gap-5">
           <SummaryCard
             rows={[
-              ["Service", booking.service.name ?? "—"],
-              ["Car", booking.car.plate],
-              ["Employee", booking.employee.name ?? "—"],
-              ["When", `${formatDay(booking.start_at)}, ${formatTime(booking.start_at)}`],
-              ["Where", booking.location.name ?? "—"],
+              ["Үйлчилгээ", booking.service.name ?? "—"],
+              ["Машин", booking.car.plate],
+              ["Ажилтан", booking.employee.name ?? "—"],
+              ["Цаг", `${formatDay(booking.start_at)}, ${formatTime(booking.start_at)}`],
+              ["Байршил", booking.location.name ?? "—"],
             ]}
             total={formatMNT(booking.price_mnt)}
           />
 
           <div className="flex flex-col gap-2.5">
             <Link href="/book/find" className={buttonVariants({ variant: "outline", size: "lg" })}>
-              Find this booking later
+              Захиалгаа дараа нь олох
             </Link>
             <Link href="/" className={buttonVariants({ variant: "ghost", size: "lg" })}>
-              Back to the site
+              Нүүр хуудас руу буцах
             </Link>
           </div>
         </div>
@@ -505,16 +505,16 @@ function BookedScreen({
         {signingUp ? (
           <div className="flex max-w-2xl flex-col gap-6">
             <div>
-              <h2 className="text-2xl font-medium tracking-tight">Keep this booking</h2>
+              <h2 className="text-2xl font-medium tracking-tight">Энэ захиалгыг хадгалах</h2>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                Pick a password and this booking moves into an account, so you will not need the code again.
+                Нууц үг үүсгэснээр энэ захиалга бүртгэл рүү шилжинэ, дараа нь код дахин хэрэггүй болно.
               </p>
             </div>
             <RegisterForm
               presetReference={booking.reference}
               presetPhone={phone}
               presetName={name}
-              submitLabel="Create account and keep booking"
+              submitLabel="Бүртгэл үүсгээд захиалгаа хадгалах"
               onDone={() => router.push("/book/bookings")}
             />
             <button
@@ -522,20 +522,20 @@ function BookedScreen({
               onClick={() => setSigningUp(false)}
               className="self-start text-[13px] text-muted-foreground underline underline-offset-4"
             >
-              Not now
+              Одоо биш
             </button>
           </div>
         ) : (
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h2 className="text-xl font-medium tracking-tight">Would rather not keep a code?</h2>
+              <h2 className="text-xl font-medium tracking-tight">Код хадгалахыг хүсэхгүй байна уу?</h2>
               <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-muted-foreground">
-                Create an account and this booking moves into it, along with anything else booked with{" "}
-                {phone.trim() || "that number"}. You will never need the code again.
+                Бүртгэл үүсгэвэл энэ захиалга болон {phone.trim() || "тэр дугаар"}-аар хийсэн бусад захиалгууд бүгд
+                бүртгэл рүү шилжинэ. Дараа нь код огт хэрэггүй болно.
               </p>
             </div>
             <Button size="lg" variant="outline" className="shrink-0" onClick={() => setSigningUp(true)}>
-              Create an account
+              Бүртгэл үүсгэх
             </Button>
           </div>
         )}

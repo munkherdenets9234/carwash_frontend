@@ -14,7 +14,7 @@ import { useApi } from "@/hooks/use-api";
 import { useQueryParam } from "@/hooks/use-query-param";
 import { api, errorMessage } from "@/lib/api/client";
 import type { Location, Shift, StaffMember } from "@/lib/api/types";
-import { addDays, businessToday, formatTime, isoDayOf } from "@/lib/utils";
+import { addDays, businessToday, formatDay, formatTime, isoDayOf } from "@/lib/utils";
 
 export function RosterScreen() {
   const today = businessToday();
@@ -30,8 +30,8 @@ export function RosterScreen() {
   return (
     <>
       <PageHeader
-        title="Roster"
-        description="A customer can only book a time that sits inside a shift."
+        title="Хуваарь"
+        description="Харилцагч зөвхөн ажлын ээлж дотор байгаа цагийг захиалах боломжтой."
         actions={
           <RangePicker
             from={from}
@@ -49,7 +49,7 @@ export function RosterScreen() {
           <DataState
             query={shifts}
             isEmpty={(rows) => rows.length === 0}
-            empty={{ title: "No shifts in this range", description: "Add one and it becomes bookable immediately." }}
+            empty={{ title: "Энэ хугацаанд ээлж алга", description: "Нэмэхэд шууд захиалах боломжтой болно." }}
           >
             {(rows) => <RosterGrid shifts={rows} onDeleted={shifts.refresh} />}
           </DataState>
@@ -89,11 +89,9 @@ function RosterGrid({ shifts, onDeleted }: { shifts: Shift[]; onDeleted: () => v
               >
                 <span className="flex flex-col">
                   <span className="text-xs font-semibold text-accent-foreground">
-                    {new Date(shift.start_at).toLocaleDateString("en-GB", {
-                      weekday: "short",
-                      day: "numeric",
-                      timeZone: "Asia/Ulaanbaatar",
-                    })}
+                    {/* formatDay, not toLocaleDateString("mn-MN") — see lib/utils.ts on
+                        why asking Intl for Mongolian words is not reliable across browsers. */}
+                    {formatDay(shift.start_at)}
                   </span>
                   <span className="font-mono text-[11px] text-accent-foreground">
                     {formatTime(shift.start_at)}–{formatTime(shift.end_at)} · {shift.location.name ?? "—"}
@@ -116,10 +114,10 @@ function DeleteShiftButton({ shift, onDeleted }: { shift: Shift; onDeleted: () =
     setPending(true);
     try {
       await api.delete(`manager/shifts/${shift.id}`);
-      toast.success("Shift removed", { description: "Those slots are no longer offered." });
+      toast.success("Ээлж устгагдлаа", { description: "Тэдгээр цагууд цаашид захиалах боломжгүй болно." });
       onDeleted();
     } catch (err) {
-      toast.error("Could not remove the shift", { description: errorMessage(err) });
+      toast.error("Ээлжийг устгаж чадсангүй", { description: errorMessage(err) });
     } finally {
       setPending(false);
     }
@@ -131,7 +129,7 @@ function DeleteShiftButton({ shift, onDeleted }: { shift: Shift; onDeleted: () =
       size="icon"
       className="size-7"
       disabled={pending}
-      aria-label={`Remove ${shift.employee.name ?? "this"} shift on ${formatTime(shift.start_at)}`}
+      aria-label={`${shift.employee.name ?? "энэ ажилтны"} ${formatTime(shift.start_at)} цагийн ээлжийг устгах`}
       onClick={remove}
     >
       <Trash2 aria-hidden className="size-3.5" />
@@ -175,10 +173,10 @@ function AddShiftPanel({
         start_at: new Date(`${day}T${start}`).toISOString(),
         end_at: new Date(`${day}T${end}`).toISOString(),
       });
-      toast.success("Shift added", { description: "Its slots are bookable now." });
+      toast.success("Ээлж нэмэгдлээ", { description: "Одоо эдгээр цагийг захиалах боломжтой." });
       onAdded();
     } catch (err) {
-      toast.error("Could not add the shift", { description: errorMessage(err) });
+      toast.error("Ээлж нэмж чадсангүй", { description: errorMessage(err) });
     } finally {
       setPending(false);
     }
@@ -187,12 +185,12 @@ function AddShiftPanel({
   return (
     <Card className="h-fit w-full shrink-0 xl:w-80">
       <CardHeader>
-        <CardTitle>Add a shift</CardTitle>
+        <CardTitle>Ээлж нэмэх</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <Field id="shift-employee" label="Employee">
+        <Field id="shift-employee" label="Ажилтан">
           <Select id="shift-employee" value={employee} onChange={(e) => setEmployeeId(e.target.value)}>
-            {employees.length === 0 && <option value="">No active employees</option>}
+            {employees.length === 0 && <option value="">Идэвхтэй ажилтан алга</option>}
             {employees.map((person) => (
               <option key={person.id} value={person.id}>
                 {person.name}
@@ -201,18 +199,18 @@ function AddShiftPanel({
           </Select>
         </Field>
 
-        <Field id="shift-site" label="Site">
+        <Field id="shift-site" label="Байршил">
           <Select id="shift-site" value={location} onChange={(e) => setLocationId(e.target.value)}>
             {locations.map((site) => (
               <option key={site.id} value={site.id}>
                 {site.name}
-                {site.active ? "" : " (closed)"}
+                {site.active ? "" : " (хаалттай)"}
               </option>
             ))}
           </Select>
         </Field>
 
-        <Field id="shift-day" label="Day">
+        <Field id="shift-day" label="Өдөр">
           <Input
             id="shift-day"
             type="date"
@@ -223,21 +221,21 @@ function AddShiftPanel({
         </Field>
 
         <div className="grid grid-cols-2 gap-3">
-          <Field id="shift-start" label="Start">
+          <Field id="shift-start" label="Эхлэх">
             <Input id="shift-start" type="time" value={start} onChange={(e) => setStart(e.target.value)} />
           </Field>
-          <Field id="shift-end" label="End">
+          <Field id="shift-end" label="Дуусах">
             <Input id="shift-end" type="time" value={end} onChange={(e) => setEnd(e.target.value)} />
           </Field>
         </div>
 
         <Button onClick={add} disabled={pending || !employee || !location}>
-          {pending ? "Adding…" : "Add shift"}
+          {pending ? "Нэмж байна…" : "Ээлж нэмэх"}
         </Button>
 
         <p className="text-xs leading-relaxed text-muted-foreground">
-          One employee cannot hold two overlapping shifts — the API refuses the second, because a roster that says
-          otherwise offers bookings at both sites.
+          Нэг ажилтан давхцсан хоёр ээлжтэй байж болохгүй — API хоёр дахь ээлжийг татгалзана, учир нь эсрэг тохиолдолд
+          хоёр байршилд зэрэг захиалга авах боломжтой болно.
         </p>
       </CardContent>
     </Card>

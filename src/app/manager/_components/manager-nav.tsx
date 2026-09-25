@@ -5,62 +5,30 @@ import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-
+import { Sidebar } from "@/components/app/sidebar";
 import { SignOutButton } from "@/components/app/sign-out-button";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { managerNav } from "@/navigation/sidebar-items";
+import { isNavItemActive, managerNav } from "@/navigation/sidebar-items";
+
+/** The desktop sidebar, using the manager's own section list. */
+export function ManagerSidebar({ name, email }: { name: string; email: string }) {
+  return <Sidebar navItems={managerNav} name={name} email={email} />;
+}
 
 /**
- * `/manager` is a prefix of every other manager route, so a plain
- * startsWith would light up "Day report" on every page. Exact match for the
- * index, prefix match for the rest.
+ * The manager's mobile chrome: a hamburger that opens a full drawer of the
+ * same links, rather than a bottom tab bar.
+ *
+ * The back office has seven sections, not three — Day report, Bookings,
+ * Roster, Timesheets, Staff, Prices & sites, Photographs. Seven tabs do not
+ * fit a thumb-width bottom bar, so this is the one signed-in area that keeps
+ * a drawer on a phone instead of adopting the bottom-tab pattern the smaller
+ * employee and customer surfaces use.
  */
-function isActive(pathname: string, href: string) {
-  return href === "/manager" ? pathname === href : pathname.startsWith(href);
-}
-
-function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
-  const pathname = usePathname();
-  return (
-    <nav aria-label="Sections" className="flex flex-col gap-0.5">
-      {managerNav.map((item) => {
-        const active = isActive(pathname, item.href);
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            onClick={onNavigate}
-            aria-current={active ? "page" : undefined}
-            className={cn(
-              "flex items-center gap-2.5 rounded-md px-3 py-2.5 text-sm transition-colors",
-              active ? "bg-primary font-semibold text-primary-foreground" : "text-foreground hover:bg-muted",
-            )}
-          >
-            <item.icon aria-hidden className="size-4 shrink-0" />
-            {item.title}
-          </Link>
-        );
-      })}
-    </nav>
-  );
-}
-
-export function ManagerSidebar({ name, email }: { name: string; email: string }) {
-  return (
-    <aside className="hidden w-60 shrink-0 flex-col gap-4 border-r border-border bg-muted/40 p-4 lg:flex">
-      <div className="flex flex-col gap-0.5 px-2 pb-2">
-        <span className="text-[15px] font-bold">Car wash</span>
-        <span className="truncate font-mono text-[11px] text-muted-foreground">{name || email}</span>
-      </div>
-      <NavLinks />
-      <SignOutButton className="mt-auto" />
-    </aside>
-  );
-}
-
 export function ManagerMobileNav({ name, email }: { name: string; email: string }) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <div className="lg:hidden">
@@ -92,7 +60,28 @@ export function ManagerMobileNav({ name, email }: { name: string; email: string 
                 <X aria-hidden />
               </Button>
             </div>
-            <NavLinks onNavigate={() => setOpen(false)} />
+
+            <nav aria-label="Sections" className="flex flex-col gap-0.5">
+              {managerNav.map((item) => {
+                const active = isNavItemActive(pathname, item, managerNav);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    aria-current={active ? "page" : undefined}
+                    className={cn(
+                      "flex items-center gap-2.5 rounded-md px-3 py-2.5 text-sm transition-colors",
+                      active ? "bg-primary font-semibold text-primary-foreground" : "text-foreground hover:bg-muted",
+                    )}
+                  >
+                    <item.icon aria-hidden className="size-4 shrink-0" />
+                    {item.title}
+                  </Link>
+                );
+              })}
+            </nav>
+
             <SignOutButton className="mt-auto" />
           </div>
         </div>

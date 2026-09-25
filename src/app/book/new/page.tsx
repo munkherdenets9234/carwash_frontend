@@ -4,7 +4,7 @@ import { getBusiness } from "@/lib/api/public";
 
 import { BookingFlow } from "../_components/booking-flow";
 
-export const metadata = { title: "Book a wash · Car Wash" };
+export const metadata = { title: "Угаалга захиалах · Car Wash" };
 
 /**
  * The trading name is fetched HERE and passed down, for the same reason the
@@ -17,7 +17,7 @@ export default async function NewBookingPage() {
   const business = await getBusiness();
 
   return (
-    <Suspense fallback={<div className="p-10 text-sm text-muted-foreground">Loading…</div>}>
+    <Suspense fallback={<div className="p-10 text-sm text-muted-foreground">Ачааллаж байна…</div>}>
       <BookingFlow businessName={business?.name} />
     </Suspense>
   );

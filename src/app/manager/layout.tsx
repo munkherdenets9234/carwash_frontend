@@ -5,7 +5,7 @@ import { parseSessionUser, USER_COOKIE } from "@/lib/api/server";
 
 import { ManagerMobileNav, ManagerSidebar } from "./_components/manager-nav";
 
-export const metadata = { title: "Back office · Car Wash" };
+export const metadata = { title: "Удирдлагын хэсэг · Car Wash" };
 
 /**
  * The back-office shell.

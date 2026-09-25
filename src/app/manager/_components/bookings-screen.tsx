@@ -34,21 +34,21 @@ export function BookingsScreen() {
   return (
     <>
       <PageHeader
-        title="Bookings"
+        title="Захиалгууд"
         actions={
           <>
             <Select
-              aria-label="Status"
+              aria-label="Төлөв"
               value={status}
               onChange={(e) => setStatus(e.target.value)}
               className="w-[10.5rem]"
             >
-              <option value="">All statuses</option>
-              <option value="booked">Booked</option>
-              <option value="in_progress">In progress</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-              <option value="no_show">No show</option>
+              <option value="">Бүх төлөв</option>
+              <option value="booked">Захиалсан</option>
+              <option value="in_progress">Хийгдэж байна</option>
+              <option value="completed">Дууссан</option>
+              <option value="cancelled">Цуцалсан</option>
+              <option value="no_show">Ирээгүй</option>
             </Select>
             <DayPicker value={day} onChange={setDay} />
           </>
@@ -60,19 +60,22 @@ export function BookingsScreen() {
           <DataState
             query={bookings}
             isEmpty={(rows) => rows.length === 0}
-            empty={{ title: "No bookings on this day", description: "Try another day, or clear the status filter." }}
+            empty={{
+              title: "Энэ өдөр захиалга алга",
+              description: "Өөр өдөр сонгох, эсвэл төлөвийн шүүлтүүрийг цэвэрлэнэ үү.",
+            }}
           >
             {(rows) => (
               <div className="rounded-lg border border-border">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Time</TableHead>
-                      <TableHead>Car</TableHead>
-                      <TableHead>Service</TableHead>
-                      <TableHead>Employee</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Price</TableHead>
+                      <TableHead>Цаг</TableHead>
+                      <TableHead>Машин</TableHead>
+                      <TableHead>Үйлчилгээ</TableHead>
+                      <TableHead>Ажилтан</TableHead>
+                      <TableHead>Төлөв</TableHead>
+                      <TableHead className="text-right">Үнэ</TableHead>
                       <TableHead />
                     </TableRow>
                   </TableHeader>
@@ -97,7 +100,7 @@ export function BookingsScreen() {
                                 question; leaving it out answers it. */}
                             {open && (
                               <Button variant="outline" size="sm" onClick={() => setSelected(row)}>
-                                Reassign
+                                Ажилтан солих
                               </Button>
                             )}
                           </TableCell>
@@ -147,13 +150,13 @@ function ReassignPanel({
     setPending(true);
     try {
       await api.put(`manager/reservations/${booking.id}/assign`, { employee_id: employeeId });
-      toast.success("Reassigned", { description: "The bonus moves with the job." });
+      toast.success("Ажилтан солигдлоо", { description: "Урамшуулал ажилтай хамт шилжинэ." });
       onDone();
     } catch (err) {
       // The API answers 409 SLOT_UNAVAILABLE when the new employee is off shift
       // or already booked. Its message says which, so it is shown verbatim
       // rather than replaced with a guess.
-      toast.error("Could not reassign", { description: errorMessage(err) });
+      toast.error("Ажилтан солиход алдаа гарлаа", { description: errorMessage(err) });
     } finally {
       setPending(false);
     }
@@ -165,12 +168,12 @@ function ReassignPanel({
         <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
           {formatRange(booking.start_at, booking.end_at)} · {booking.car.plate}
         </span>
-        <CardTitle>Reassign this job</CardTitle>
+        <CardTitle>Ажилтан солих</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <Field id="reassign-to" label="Move to">
+        <Field id="reassign-to" label="Хэн рүү шилжүүлэх">
           <Select id="reassign-to" value={employeeId} onChange={(e) => setEmployeeId(e.target.value)}>
-            {others.length === 0 && <option value="">No other employee available</option>}
+            {others.length === 0 && <option value="">Өөр ажилтан алга байна</option>}
             {others.map((employee) => (
               <option key={employee.id} value={employee.id}>
                 {employee.name}
@@ -180,22 +183,22 @@ function ReassignPanel({
         </Field>
 
         <div className="flex items-baseline gap-3 rounded-md border border-border bg-muted px-3 py-2.5">
-          <span className="flex-1 text-[13px] text-muted-foreground">Bonus moves with it</span>
+          <span className="flex-1 text-[13px] text-muted-foreground">Урамшуулал хамт шилжинэ</span>
           <span className="text-sm font-bold tabular-nums">{formatMNT(booking.bonus_mnt)}</span>
         </div>
 
         <div className="flex gap-2">
           <Button className="flex-1" onClick={reassign} disabled={pending || !employeeId}>
-            {pending ? "Reassigning…" : "Reassign"}
+            {pending ? "Шилжүүлж байна…" : "Шилжүүлэх"}
           </Button>
           <Button variant="outline" onClick={onClose}>
-            Cancel
+            Цуцлах
           </Button>
         </div>
 
         <p className="text-xs leading-relaxed text-muted-foreground">
-          Availability is re-checked when you confirm: if that employee is off shift or already booked at this time, the
-          API refuses and says which.
+          Баталгаажуулахад боломжийг дахин шалгана: тухайн ажилтан энэ цагт ажиллахгүй эсвэл өөр захиалгатай бол API
+          татгалзаж, шалтгааныг харуулна.
         </p>
       </CardContent>
     </Card>

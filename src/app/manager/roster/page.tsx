@@ -2,7 +2,7 @@ import { Suspense } from "react";
 
 import { RosterScreen } from "../_components/roster-screen";
 
-export const metadata = { title: "Roster · Car Wash" };
+export const metadata = { title: "Хуваарь · Car Wash" };
 
 export default function ManagerRosterPage() {
   return (

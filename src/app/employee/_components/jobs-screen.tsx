@@ -15,16 +15,16 @@ import type { ReservationStatus, StaffReservation } from "@/lib/api/types";
 import { businessToday, formatMNT, formatRange } from "@/lib/utils";
 import { employeeNav } from "@/navigation/sidebar-items";
 
-export function JobsScreen() {
+export function JobsScreen({ name, email }: { name?: string; email?: string }) {
   const today = businessToday();
   const jobs = useApi<StaffReservation[]>("employee/jobs", { from: today, to: today });
 
   return (
-    <MobileShell title="Today's jobs" nav={employeeNav}>
+    <MobileShell title="Өнөөдрийн ажлууд" nav={employeeNav} name={name} email={email}>
       <DataState
         query={jobs}
         isEmpty={(rows) => rows.length === 0}
-        empty={{ title: "No jobs today", description: "Bookings a customer makes for you will appear here." }}
+        empty={{ title: "Өнөөдөр ажил алга", description: "Харилцагчийн захиалгууд энд харагдана." }}
       >
         {(rows) => (
           <ul className="flex flex-col gap-3">
@@ -61,11 +61,11 @@ function JobCard({ job, onChanged }: { job: StaffReservation; onChanged: () => v
       await api.put(`employee/jobs/${job.id}/status`, { status });
       toast.success(
         message,
-        status === "completed" ? { description: `${formatMNT(job.bonus_mnt)} is yours.` } : undefined,
+        status === "completed" ? { description: `${formatMNT(job.bonus_mnt)} таных боллоо.` } : undefined,
       );
       onChanged();
     } catch (err) {
-      toast.error("Could not update the job", { description: errorMessage(err) });
+      toast.error("Ажлыг шинэчилж чадсангүй", { description: errorMessage(err) });
     } finally {
       setPending(null);
     }
@@ -97,7 +97,7 @@ function JobCard({ job, onChanged }: { job: StaffReservation; onChanged: () => v
           <div className="flex flex-col gap-3 border-t border-border pt-3">
             <div className="flex items-center gap-3">
               <div className="flex flex-1 flex-col gap-0.5">
-                <span className="text-[13px] font-semibold">{job.customer.name ?? "Customer"}</span>
+                <span className="text-[13px] font-semibold">{job.customer.name ?? "Харилцагч"}</span>
                 {job.customer.phone && (
                   <span className="font-mono text-[13px] text-muted-foreground">{job.customer.phone}</span>
                 )}
@@ -108,7 +108,7 @@ function JobCard({ job, onChanged }: { job: StaffReservation; onChanged: () => v
                 // breaks keyboard activation and is invalid HTML.
                 <a
                   href={`tel:${job.customer.phone.replace(/\s/g, "")}`}
-                  aria-label={`Call ${job.customer.name ?? "the customer"}`}
+                  aria-label={`${job.customer.name ?? "харилцагч"} руу залгах`}
                   className={buttonVariants({ variant: "outline", size: "icon" })}
                 >
                   <Phone aria-hidden />
@@ -121,15 +121,15 @@ function JobCard({ job, onChanged }: { job: StaffReservation; onChanged: () => v
             )}
 
             <div className="flex items-baseline gap-3 rounded-md border border-border bg-muted px-3 py-2.5">
-              <span className="flex-1 text-[13px] text-muted-foreground">Customer pays</span>
+              <span className="flex-1 text-[13px] text-muted-foreground">Харилцагчийн төлөх дүн</span>
               <span className="text-sm font-bold tabular-nums">{formatMNT(job.price_mnt)}</span>
             </div>
 
             {live ? (
               <div className="flex flex-col gap-2">
                 {job.status === "booked" && (
-                  <Button size="lg" onClick={() => move("in_progress", "Started")} disabled={pending !== null}>
-                    {pending === "in_progress" ? "Starting…" : "Start this wash"}
+                  <Button size="lg" onClick={() => move("in_progress", "Эхэллээ")} disabled={pending !== null}>
+                    {pending === "in_progress" ? "Эхэлж байна…" : "Угаалгыг эхлүүлэх"}
                   </Button>
                 )}
                 <div className="flex gap-2">
@@ -137,29 +137,28 @@ function JobCard({ job, onChanged }: { job: StaffReservation; onChanged: () => v
                     variant={job.status === "in_progress" ? "default" : "outline"}
                     size="lg"
                     className="flex-1"
-                    onClick={() => move("completed", "Completed")}
+                    onClick={() => move("completed", "Дууслаа")}
                     disabled={pending !== null}
                   >
-                    {pending === "completed" ? "Saving…" : "Mark complete"}
+                    {pending === "completed" ? "Хадгалж байна…" : "Дуусгах"}
                   </Button>
                   <Button
                     variant="destructive"
                     size="lg"
                     className="flex-1"
-                    onClick={() => move("no_show", "Marked as a no show")}
+                    onClick={() => move("no_show", "Ирээгүй гэж тэмдэглэлээ")}
                     disabled={pending !== null}
                   >
-                    No show
+                    Ирээгүй
                   </Button>
                 </div>
                 <p className="text-xs leading-relaxed text-muted-foreground">
-                  Completing it books {formatMNT(job.bonus_mnt)} to you on today's report. It cannot be reopened
-                  afterwards.
+                  Дуусгасны дараа {formatMNT(job.bonus_mnt)} таны өнөөдрийн тайланд орно. Дараа нь дахин нээх боломжгүй.
                 </p>
               </div>
             ) : (
               <p className="text-xs text-muted-foreground">
-                This job is closed. Only a manager can change a finished booking.
+                Энэ ажил хаагдсан байна. Дууссан захиалгыг зөвхөн менежер өөрчлөх боломжтой.
               </p>
             )}
           </div>

@@ -45,8 +45,8 @@ export type ShellLink = {
  * way back. Signed-in pages pass their own.
  */
 const GUEST_LINKS: ShellLink[] = [
-  { label: "Find a booking", href: "/book/find" },
-  { label: "Back to site", href: "/" },
+  { label: "Захиалга хайх", href: "/book/find" },
+  { label: "Нүүр хуудас руу", href: "/" },
 ];
 
 export function BookingShell({
@@ -130,18 +130,18 @@ export function BookingShell({
             {/* The telephone number is on this page for the same reason it is
                 in the site footer: a form that will not do what somebody
                 needs should never be the end of the road. */}
-            Trouble booking? Call{" "}
+            Захиалахад бэрхшээлтэй байна уу? Утасдаарай:{" "}
             <a href={contact.phoneHref} className="font-medium text-foreground">
               {contact.phone}
             </a>
           </p>
           {footerNote ?? (
             <p>
-              Been here before?{" "}
+              Өмнө нь захиалж байсан уу?{" "}
               <Link href="/login" className="font-medium text-foreground underline underline-offset-4">
-                Sign in
+                Нэвтрэх
               </Link>{" "}
-              for your full history.
+              бол бүх захиалгынхаа түүхийг харна.
             </p>
           )}
         </div>
@@ -187,14 +187,14 @@ export function StepRail({ step, labels }: { step: number; labels: string[] }) {
  * somebody signed in has all of theirs on the screen already.
  */
 export const ACCOUNT_LINKS: ShellLink[] = [
-  { label: "Garage", href: "/book" },
-  { label: "Bookings", href: "/book/bookings" },
+  { label: "Миний машин", href: "/book" },
+  { label: "Захиалгууд", href: "/book/bookings" },
   // Every account page carries a "Book a wash" button of its own, so this
   // one is the header link that can stand down on a phone.
-  { label: "Book", href: "/book/new", secondary: true },
+  { label: "Захиалах", href: "/book/new", secondary: true },
 ];
 
 /** Replaces the footer's sign-in invitation once there is an account. */
 export function AccountFooterNote() {
-  return <p>Every booking you make with this account is kept here — no code to look after.</p>;
+  return <p>Энэ бүртгэлээр хийсэн бүх захиалга энд хадгалагдана — код санах шаардлагагүй.</p>;
 }

@@ -18,9 +18,20 @@ import type { Media, MediaRole } from "@/lib/api/types";
 const TAGS = ["exterior", "interior", "detailing", "beforeAfter"] as const;
 
 const ROLE_LABEL: Record<MediaRole, string> = {
-  hero: "Home cover",
-  about: "About section",
-  gallery: "Gallery",
+  hero: "Нүүр хуудасны зураг",
+  about: "Бидний тухай зураг",
+  gallery: "Галерей",
+};
+
+// Display labels for the tag enum values the API expects verbatim. The
+// values themselves ("exterior", "interior", ...) are wire format and stay
+// in English — this is the one place they are TRANSLATED FOR DISPLAY rather
+// than sent, the same distinction ROLE_LABEL already draws for role.
+const TAG_LABEL: Record<(typeof TAGS)[number], string> = {
+  exterior: "Гадна тал",
+  interior: "Дотор тал",
+  detailing: "Нарийн арчилгаа",
+  beforeAfter: "Өмнө/Дараа",
 };
 
 /**
@@ -40,8 +51,8 @@ export function GalleryScreen() {
   return (
     <>
       <PageHeader
-        title="Photographs"
-        description="What the public site shows. The home cover and the about picture are one each; everything else is the gallery."
+        title="Зургууд"
+        description="Нийтэд харагдах зургууд. Нүүр хуудас, бидний тухай хэсэг тус бүр нэг зурагтай; бусад нь бүгд галерейд ордог."
       />
 
       <div className="grid gap-6 p-6 sm:p-8 xl:grid-cols-[1fr_26rem]">
@@ -50,8 +61,8 @@ export function GalleryScreen() {
             query={media}
             isEmpty={(rows) => rows.length === 0}
             empty={{
-              title: "No photographs yet",
-              description: "The site is showing its placeholder tiles until you upload something.",
+              title: "Одоогоор зураг алга",
+              description: "Та зураг оруулах хүртэл сайт түр загварын зургуудыг харуулна.",
             }}
           >
             {(rows) => (
@@ -87,8 +98,8 @@ function SlotCard({ mediaRole: role, rows, onChange }: { mediaRole: MediaRole; r
           <Tile photo={photo} rows={rows} onChange={onChange} />
         ) : (
           <p className="text-sm text-muted-foreground">
-            Nothing chosen. The site falls back to the first gallery photograph — pick one below with “Use as{" "}
-            {ROLE_LABEL[role].toLowerCase()}”.
+            Одоогоор сонгоогүй байна. Сайт галерейн эхний зургийг ашиглана — доор “{ROLE_LABEL[role]} болгох” товчоор
+            сонгоно уу.
           </p>
         )}
       </CardContent>
@@ -102,11 +113,11 @@ function GalleryCard({ rows, onChange }: { rows: Media[]; onChange: () => void }
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Gallery ({gallery.length})</CardTitle>
+        <CardTitle>Галерей ({gallery.length})</CardTitle>
       </CardHeader>
       <CardContent>
         {gallery.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No gallery photographs yet.</p>
+          <p className="text-sm text-muted-foreground">Галерейд одоогоор зураг алга.</p>
         ) : (
           <ul className="grid gap-4 sm:grid-cols-2">
             {gallery.map((photo) => (
@@ -143,11 +154,11 @@ function Tile({ photo, rows, onChange }: { photo: Media; rows: Media[]; onChange
     // No confirm dialog: deleting removes the file at the image host too, so
     // there is nothing to undo and a one-line "are you sure" is the only
     // thing between a misclick and a photograph that has to be re-shot.
-    if (!window.confirm("Delete this photograph? The file is removed and cannot be recovered.")) return;
+    if (!window.confirm("Энэ зургийг устгах уу? Файл устаж, сэргээх боломжгүй болно.")) return;
     setBusy(true);
     try {
       await api.delete(`manager/media/${photo.id}`);
-      toast.success("Deleted");
+      toast.success("Устгагдлаа");
       onChange();
     } catch (err) {
       toast.error(errorMessage(err));
@@ -156,7 +167,7 @@ function Tile({ photo, rows, onChange }: { photo: Media; rows: Media[]; onChange
     }
   }
 
-  const alt = photo.alt.en || photo.alt.mn || "Untitled photograph";
+  const alt = photo.alt.mn || photo.alt.en || "Гарчиггүй зураг";
 
   return (
     <div className="flex gap-3 rounded-lg border border-border p-3">
@@ -185,9 +196,9 @@ function Tile({ photo, rows, onChange }: { photo: Media; rows: Media[]; onChange
             </div>
 
             <div className="flex flex-wrap items-center gap-1.5">
-              <Badge tone={photo.active ? "active" : "neutral"}>{photo.active ? "Live" : "Hidden"}</Badge>
+              <Badge tone={photo.active ? "active" : "neutral"}>{photo.active ? "Идэвхтэй" : "Нуугдсан"}</Badge>
               {photo.role !== "gallery" && <Badge tone="neutral">{ROLE_LABEL[photo.role]}</Badge>}
-              {photo.feature && <Badge tone="neutral">Featured</Badge>}
+              {photo.feature && <Badge tone="neutral">Онцлох</Badge>}
             </div>
 
             <div className="flex flex-wrap gap-1.5">
@@ -195,16 +206,16 @@ function Tile({ photo, rows, onChange }: { photo: Media; rows: Media[]; onChange
                   others do. The quick buttons stay because moving a photograph
                   into the cover slot is one click and should not cost a form. */}
               <Button size="sm" variant="outline" disabled={busy} onClick={() => setEditing(true)}>
-                Edit
+                Засах
               </Button>
               {photo.role !== "hero" && (
                 <Button
                   size="sm"
                   variant="outline"
                   disabled={busy}
-                  onClick={() => patch({ role: "hero" }, "Home cover set")}
+                  onClick={() => patch({ role: "hero" }, "Нүүр хуудасны зураг болголоо")}
                 >
-                  Use as home cover
+                  Нүүр хуудасны зураг болгох
                 </Button>
               )}
               {photo.role !== "about" && (
@@ -212,9 +223,9 @@ function Tile({ photo, rows, onChange }: { photo: Media; rows: Media[]; onChange
                   size="sm"
                   variant="outline"
                   disabled={busy}
-                  onClick={() => patch({ role: "about" }, "About picture set")}
+                  onClick={() => patch({ role: "about" }, "Бидний тухай зураг болголоо")}
                 >
-                  Use in about
+                  Бидний тухай хэсэгт ашиглах
                 </Button>
               )}
               <Button
@@ -222,22 +233,20 @@ function Tile({ photo, rows, onChange }: { photo: Media; rows: Media[]; onChange
                 variant="outline"
                 disabled={busy}
                 onClick={() =>
-                  patch({ active: !photo.active }, photo.active ? "Hidden from the site" : "Showing on the site")
+                  patch({ active: !photo.active }, photo.active ? "Сайтаас нуулаа" : "Сайтад харагдаж байна")
                 }
               >
-                {photo.active ? "Hide" : "Show"}
+                {photo.active ? "Нуух" : "Харуулах"}
               </Button>
               <Button size="sm" variant="outline" disabled={busy} onClick={remove}>
-                Delete
+                Устгах
               </Button>
             </div>
 
             {/* Replacing the previous holder is stated where it happens, so it is
                 not a surprise after the click. */}
             {rows.some((m) => m.role === "hero") && photo.role !== "hero" && (
-              <p className="text-[11px] text-muted-foreground">
-                Setting a new cover moves the current one to the gallery.
-              </p>
+              <p className="text-[11px] text-muted-foreground">Шинэ зураг сонговол одоогийнх нь галерей руу шилжинэ.</p>
             )}
           </>
         )}
@@ -275,7 +284,7 @@ function EditForm({ photo, onSaved, onCancel }: { photo: Media; onSaved: () => v
     event.preventDefault();
 
     if (!altMN.trim() && !altEN.trim()) {
-      toast.error("Describe the photograph in at least one language.");
+      toast.error("Зургийг дор хаяж нэг хэлээр тайлбарлана уу.");
       return;
     }
 
@@ -293,13 +302,13 @@ function EditForm({ photo, onSaved, onCancel }: { photo: Media; onSaved: () => v
           // field somebody later mistakes for a fact.
           ...(role === "gallery" ? { tag, feature } : {}),
         });
-        toast.success("Saved");
+        toast.success("Хадгалагдлаа");
       }
       onSaved();
     } catch (err) {
       toast.error(
         hasCode(err, "LIMIT_EXCEEDED")
-          ? "Your plan's gallery is full. A replacement is uploaded before the old picture is removed, so delete one first."
+          ? "Таны багцын галерей дүүрсэн байна. Шинэ зургийг хуучнаас өмнө байршуулдаг тул эхлээд нэгийг устгана уу."
           : errorMessage(err),
       );
     } finally {
@@ -327,9 +336,7 @@ function EditForm({ photo, onSaved, onCancel }: { photo: Media; onSaved: () => v
     try {
       await api.delete(`manager/media/${photo.id}`);
     } catch {
-      toast.error(
-        "The new picture is live, but the old one could not be removed. It is in the gallery below — delete it there.",
-      );
+      toast.error("Шинэ зураг идэвхжсэн ч хуучныг устгаж чадсангүй. Доорх галерейд байгаа тул тэндээс устгана уу.");
     }
 
     // Carry the position across, so a replaced tile does not jump to the end
@@ -338,54 +345,54 @@ function EditForm({ photo, onSaved, onCancel }: { photo: Media; onSaved: () => v
       await api.put(`manager/media/${created.id}`, { sort_order: photo.sort_order });
     }
 
-    toast.success("Picture replaced");
+    toast.success("Зураг солигдлоо");
   }
 
   const id = `edit-${photo.id}`;
 
   return (
     <form onSubmit={save} className="flex flex-col gap-3">
-      <Field id={`${id}-role`} label="Where it goes">
+      <Field id={`${id}-role`} label="Хаана ашиглах">
         <Select id={`${id}-role`} value={role} onChange={(e) => setRole(e.target.value as MediaRole)}>
-          <option value="gallery">Gallery</option>
-          <option value="hero">Home cover</option>
-          <option value="about">About section</option>
+          <option value="gallery">Галерей</option>
+          <option value="hero">Нүүр хуудасны зураг</option>
+          <option value="about">Бидний тухай зураг</option>
         </Select>
       </Field>
 
       {role === "gallery" && (
-        <Field id={`${id}-tag`} label="Tag">
+        <Field id={`${id}-tag`} label="Ангилал">
           <Select id={`${id}-tag`} value={tag} onChange={(e) => setTag(e.target.value)}>
             {TAGS.map((t) => (
               <option key={t} value={t}>
-                {t}
+                {TAG_LABEL[t]}
               </option>
             ))}
           </Select>
         </Field>
       )}
 
-      <Field id={`${id}-mn`} label="Description (Mongolian)">
+      <Field id={`${id}-mn`} label="Тайлбар (Монгол)">
         <Input id={`${id}-mn`} value={altMN} onChange={(e) => setAltMN(e.target.value)} />
       </Field>
-      <Field id={`${id}-en`} label="Description (English)">
+      <Field id={`${id}-en`} label="Тайлбар (Англи)">
         <Input id={`${id}-en`} value={altEN} onChange={(e) => setAltEN(e.target.value)} />
       </Field>
 
       {role === "gallery" && (
         <label className="flex items-center gap-2 text-[13px] font-medium text-foreground">
           <input type="checkbox" checked={feature} onChange={(e) => setFeature(e.target.checked)} className="size-4" />
-          Give it a larger tile in the grid
+          Хүснэгтэд том хэмжээгээр харуулах
         </label>
       )}
 
       <Field
         id={`${id}-file`}
-        label="Replace the picture"
+        label="Зургийг солих"
         hint={
           file
-            ? "The current picture is removed once the new one is uploaded."
-            : "Leave empty to keep the current picture and change only the details."
+            ? "Шинэ зураг байршсаны дараа одоогийн зураг устана."
+            : "Одоогийн зургийг хэвээр үлдээж, зөвхөн мэдээллийг өөрчлөхийг хүсвэл хоосон орхино уу."
         }
       >
         <Input
@@ -398,10 +405,10 @@ function EditForm({ photo, onSaved, onCancel }: { photo: Media; onSaved: () => v
 
       <div className="flex flex-wrap gap-1.5">
         <Button type="submit" size="sm" disabled={busy}>
-          {busy ? (file ? "Replacing…" : "Saving…") : "Save"}
+          {busy ? (file ? "Солиж байна…" : "Хадгалж байна…") : "Хадгалах"}
         </Button>
         <Button type="button" size="sm" variant="outline" disabled={busy} onClick={onCancel}>
-          Cancel
+          Цуцлах
         </Button>
       </div>
     </form>
@@ -419,21 +426,21 @@ function UploadCard({ onUploaded }: { onUploaded: () => void }) {
 
     const file = form.get("file");
     if (!(file instanceof File) || file.size === 0) {
-      toast.error("Choose an image first.");
+      toast.error("Эхлээд зураг сонгоно уу.");
       return;
     }
     if (!String(form.get("alt_mn") ?? "").trim() && !String(form.get("alt_en") ?? "").trim()) {
       // Checked here as well as on the server, because the server's refusal
       // arrives after the file has been uploaded over a slow connection and
       // this one does not.
-      toast.error("Describe the photograph in at least one language.");
+      toast.error("Зургийг дор хаяж нэг хэлээр тайлбарлана уу.");
       return;
     }
 
     setBusy(true);
     try {
       await api.upload<Media>("manager/media", form);
-      toast.success("Uploaded");
+      toast.success("Байршууллаа");
       formRef.current?.reset();
       setRole("gallery");
       onUploaded();
@@ -449,11 +456,11 @@ function UploadCard({ onUploaded }: { onUploaded: () => void }) {
   return (
     <Card className="h-fit">
       <CardHeader>
-        <CardTitle>Add a photograph</CardTitle>
+        <CardTitle>Зураг нэмэх</CardTitle>
       </CardHeader>
       <CardContent>
         <form ref={formRef} onSubmit={submit} className="flex flex-col gap-4">
-          <Field id="media-file" label="Image">
+          <Field id="media-file" label="Зураг">
             <Input
               id="media-file"
               type="file"
@@ -463,20 +470,20 @@ function UploadCard({ onUploaded }: { onUploaded: () => void }) {
             />
           </Field>
 
-          <Field id="media-role" label="Where it goes">
+          <Field id="media-role" label="Хаана ашиглах">
             <Select id="media-role" name="role" value={role} onChange={(e) => setRole(e.target.value as MediaRole)}>
-              <option value="gallery">Gallery</option>
-              <option value="hero">Home cover</option>
-              <option value="about">About section</option>
+              <option value="gallery">Галерей</option>
+              <option value="hero">Нүүр хуудасны зураг</option>
+              <option value="about">Бидний тухай зураг</option>
             </Select>
           </Field>
 
           {role === "gallery" && (
-            <Field id="media-tag" label="Tag">
+            <Field id="media-tag" label="Ангилал">
               <Select id="media-tag" name="tag" defaultValue="exterior">
                 {TAGS.map((tag) => (
                   <option key={tag} value={tag}>
-                    {tag}
+                    {TAG_LABEL[tag]}
                   </option>
                 ))}
               </Select>
@@ -486,19 +493,19 @@ function UploadCard({ onUploaded }: { onUploaded: () => void }) {
           {/* Both languages, because the site runs in both and the caption is
               the only description a screen reader gets. One is enough; the
               other falls back to it. */}
-          <Field id="media-alt-mn" label="Description (Mongolian)">
+          <Field id="media-alt-mn" label="Тайлбар (Монгол)">
             <Input id="media-alt-mn" name="alt_mn" placeholder="Хөөсөн угаалга" />
           </Field>
-          <Field id="media-alt-en" label="Description (English)">
+          <Field id="media-alt-en" label="Тайлбар (Англи)">
             <Input id="media-alt-en" name="alt_en" placeholder="Foam wash" />
           </Field>
 
           <Button type="submit" disabled={busy}>
-            {busy ? "Uploading…" : "Upload"}
+            {busy ? "Байршуулж байна…" : "Байршуулах"}
           </Button>
 
           <p className="text-[11px] text-muted-foreground">
-            jpeg, png, gif or webp. The size is read from the file, so the page never shifts as photographs load.
+            jpeg, png, gif эсвэл webp. Хэмжээ файлаас автоматаар уншигдана, тул зураг ачаалахад хуудас шилжихгүй.
           </p>
         </form>
       </CardContent>

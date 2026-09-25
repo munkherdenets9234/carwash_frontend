@@ -2,7 +2,7 @@ import { Suspense } from "react";
 
 import { BookingsScreen } from "../_components/bookings-screen";
 
-export const metadata = { title: "Bookings · Car Wash" };
+export const metadata = { title: "Захиалгууд · Car Wash" };
 
 export default function ManagerBookingsPage() {
   return (

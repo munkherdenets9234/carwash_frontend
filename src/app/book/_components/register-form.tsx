@@ -33,7 +33,7 @@ export function RegisterForm({
   presetPhone,
   presetName,
   onDone,
-  submitLabel = "Create account",
+  submitLabel = "Бүртгэл үүсгэх",
 }: {
   /** A reference this page already holds, e.g. the booking just made. */
   presetReference?: string;
@@ -79,16 +79,16 @@ export function RegisterForm({
         // phone number" and "there is already an account for that phone
         // number" — each tell somebody exactly what to do next, and both are
         // useless replaced with "could not register".
-        setError(envelope?.error?.message ?? envelope?.message ?? "Could not create the account.");
+        setError(envelope?.error?.message ?? envelope?.message ?? "Бүртгэл үүсгэж чадсангүй.");
         return;
       }
 
-      toast.success("Account created");
+      toast.success("Бүртгэл үүслээ");
       if (onDone) onDone();
       else router.push("/book/bookings");
       router.refresh();
     } catch {
-      setError("The server could not be reached. Try again in a moment.");
+      setError("Серверт холбогдож чадсангүй. Түр хүлээгээд дахин оролдоно уу.");
     } finally {
       setPending(false);
     }
@@ -97,14 +97,14 @@ export function RegisterForm({
   return (
     <form onSubmit={submit} className="flex flex-col gap-5">
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field id="reg-name" label="Your name">
+        <Field id="reg-name" label="Таны нэр">
           <Input id="reg-name" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" required />
         </Field>
 
         <Field
           id="reg-phone"
-          label="Phone number"
-          hint={locked ? "The number this booking was made with." : "Optional, but it links any bookings you make."}
+          label="Утасны дугаар"
+          hint={locked ? "Энэ захиалгыг хийсэн утасны дугаар." : "Заавал биш, гэхдээ хийсэн захиалгуудтай холбоно."}
         >
           <Input
             id="reg-phone"
@@ -119,7 +119,7 @@ export function RegisterForm({
         </Field>
       </div>
 
-      <Field id="reg-email" label="Email">
+      <Field id="reg-email" label="Имэйл">
         <Input
           id="reg-email"
           type="email"
@@ -130,7 +130,7 @@ export function RegisterForm({
         />
       </Field>
 
-      <Field id="reg-password" label="Password" hint="At least 8 characters.">
+      <Field id="reg-password" label="Нууц үг" hint="Хамгийн багадаа 8 тэмдэгт.">
         <Input
           id="reg-password"
           type="password"
@@ -144,14 +144,14 @@ export function RegisterForm({
 
       {locked ? (
         <p className="rounded-lg border border-border bg-muted px-4 py-3 text-[13px] leading-relaxed">
-          Booking <span className="font-mono font-semibold">{presetReference}</span> will be moved into this account,
-          along with anything else booked with that number.
+          <span className="font-mono font-semibold">{presetReference}</span> захиалга энэ бүртгэл рүү шилжинэ, мөн энэ
+          дугаараар хийсэн бусад захиалгууд ч мөн адил.
         </p>
       ) : (
         <Field
           id="reg-reference"
-          label="Booking code"
-          hint="Optional. Booked with us before without an account? Enter the code to bring those bookings in."
+          label="Захиалгын код"
+          hint="Заавал биш. Өмнө нь бүртгэлгүйгээр захиалж байсан бол кодоо оруулж захиалгаа энд авчрах боломжтой."
         >
           <Input
             id="reg-reference"
@@ -172,7 +172,7 @@ export function RegisterForm({
       )}
 
       <Button type="submit" size="lg" disabled={pending} className="sm:w-fit sm:px-8">
-        {pending ? "Creating…" : submitLabel}
+        {pending ? "Үүсгэж байна…" : submitLabel}
       </Button>
     </form>
   );

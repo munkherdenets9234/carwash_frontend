@@ -46,15 +46,15 @@ export function GarageScreen({ businessName }: { businessName?: string }) {
   return (
     <BookingShell
       businessName={businessName}
-      eyebrow="Your account"
-      title="Your garage"
-      description="Cars you book for often. Not required — you can type a plate straight into a booking."
+      eyebrow="Таны бүртгэл"
+      title="Миний машин"
+      description="Байнга захиалдаг машинууд. Заавал биш — захиалгад дугаараа шууд бичиж болно."
       links={ACCOUNT_LINKS}
       headerAction={<SignOutButton compact />}
       footerNote={<AccountFooterNote />}
       aside={
         <Link href="/book/new" className={buttonVariants({ size: "lg" })}>
-          Book a wash
+          Захиалах
         </Link>
       }
     >
@@ -67,13 +67,13 @@ export function GarageScreen({ businessName }: { businessName?: string }) {
             <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 <span className="font-mono text-[11px] uppercase tracking-wider text-accent-foreground">
-                  Next booking
+                  Дараагийн захиалга
                 </span>
                 <span className="text-xl font-medium tracking-tight text-accent-foreground">
                   {next.service.name} · {formatDay(next.start_at)} {formatTime(next.start_at)}
                 </span>
                 <span className="text-sm text-accent-foreground">
-                  with {next.employee.name} · {next.location.name}
+                  {next.employee.name} · {next.location.name}
                 </span>
               </div>
               <ReservationBadge status={next.status} />
@@ -83,10 +83,10 @@ export function GarageScreen({ businessName }: { businessName?: string }) {
 
         <section className="flex flex-col gap-5">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">Your cars</h2>
+            <h2 className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">Миний машинууд</h2>
             <Button variant="outline" size="sm" onClick={() => setAdding((a) => !a)} aria-expanded={adding}>
               <Plus aria-hidden className="size-4" />
-              Add a car
+              Машин нэмэх
             </Button>
           </div>
 
@@ -103,8 +103,9 @@ export function GarageScreen({ businessName }: { businessName?: string }) {
             query={cars}
             isEmpty={(rows) => rows.length === 0}
             empty={{
-              title: "No cars saved",
-              description: "You do not need one — a booking asks for the plate. Saving a car just saves the typing.",
+              title: "Хадгалсан машин алга",
+              description:
+                "Заавал хэрэггүй — захиалахдаа дугаараа бичихэд хангалттай. Машин хадгалснаар дараа дахин бичих шаардлагагүй.",
             }}
           >
             {(rows) => (
@@ -114,7 +115,7 @@ export function GarageScreen({ businessName }: { businessName?: string }) {
                     <div className="flex min-w-0 flex-1 flex-col gap-1">
                       <span className="font-mono text-2xl font-medium tracking-tight">{car.plate}</span>
                       <span className="truncate text-sm text-muted-foreground">
-                        {[car.make, car.model, car.color].filter(Boolean).join(" · ") || "No details"}
+                        {[car.make, car.model, car.color].filter(Boolean).join(" · ") || "Дэлгэрэнгүй алга"}
                       </span>
                       {car.notes && <span className="truncate text-[13px] text-muted-foreground">{car.notes}</span>}
                     </div>
@@ -123,7 +124,7 @@ export function GarageScreen({ businessName }: { businessName?: string }) {
                         href={`/book/new?plate=${encodeURIComponent(car.plate)}`}
                         className={buttonVariants({ variant: "outline", size: "sm" })}
                       >
-                        Book this car
+                        Энэ машинаар захиалах
                       </Link>
                       <DeleteCarButton car={car} onDeleted={cars.refresh} />
                     </div>
@@ -149,13 +150,13 @@ function AddCarForm({ onAdded }: { onAdded: () => void }) {
     setPending(true);
     try {
       await api.post("customer/cars", { plate, make, model, notes });
-      toast.success("Car added");
+      toast.success("Машин нэмэгдлээ");
       onAdded();
     } catch (err) {
       // 409 when this owner already has that plate. The plate is normalised
       // server-side, so "1234 uba" and "1234UBA" collide — which is the
       // intended behaviour and worth the clear message.
-      toast.error("Could not add the car", { description: errorMessage(err) });
+      toast.error("Машин нэмж чадсангүй", { description: errorMessage(err) });
     } finally {
       setPending(false);
     }
@@ -164,7 +165,7 @@ function AddCarForm({ onAdded }: { onAdded: () => void }) {
   return (
     <div className="flex flex-col gap-5 rounded-xl border border-border bg-card p-6 lg:max-w-2xl">
       <div className="grid gap-5 sm:grid-cols-3">
-        <Field id="car-plate" label="Plate">
+        <Field id="car-plate" label="Дугаар">
           <Input
             id="car-plate"
             value={plate}
@@ -174,18 +175,18 @@ function AddCarForm({ onAdded }: { onAdded: () => void }) {
             autoCapitalize="characters"
           />
         </Field>
-        <Field id="car-make" label="Make">
+        <Field id="car-make" label="Үйлдвэрлэгч">
           <Input id="car-make" value={make} onChange={(e) => setMake(e.target.value)} autoComplete="off" />
         </Field>
-        <Field id="car-model" label="Model">
+        <Field id="car-model" label="Загвар">
           <Input id="car-model" value={model} onChange={(e) => setModel(e.target.value)} autoComplete="off" />
         </Field>
       </div>
-      <Field id="car-notes" label="Notes" hint="Anything the employee should know.">
+      <Field id="car-notes" label="Тэмдэглэл" hint="Ажилтанд мэдэгдэх зүйл байвал бичнэ үү.">
         <Input id="car-notes" value={notes} onChange={(e) => setNotes(e.target.value)} autoComplete="off" />
       </Field>
       <Button onClick={add} disabled={pending || !plate.trim()} className="sm:w-fit sm:px-8">
-        {pending ? "Adding…" : "Add car"}
+        {pending ? "Нэмж байна…" : "Машин нэмэх"}
       </Button>
     </div>
   );
@@ -199,10 +200,10 @@ function DeleteCarButton({ car, onDeleted }: { car: Car; onDeleted: () => void }
     setPending(true);
     try {
       await api.delete(`customer/cars/${car.id}`);
-      toast.success("Car removed");
+      toast.success("Машин устгагдлаа");
       onDeleted();
     } catch (err) {
-      toast.error("Could not remove the car", { description: errorMessage(err) });
+      toast.error("Машин устгаж чадсангүй", { description: errorMessage(err) });
     } finally {
       setPending(false);
       setConfirming(false);
@@ -215,10 +216,10 @@ function DeleteCarButton({ car, onDeleted }: { car: Car; onDeleted: () => void }
     return (
       <div className="flex shrink-0 gap-1.5">
         <Button variant="destructive" size="sm" onClick={remove} disabled={pending}>
-          {pending ? "…" : "Remove"}
+          {pending ? "…" : "Устгах"}
         </Button>
         <Button variant="ghost" size="sm" onClick={() => setConfirming(false)}>
-          Keep
+          Хадгалах
         </Button>
       </div>
     );
@@ -229,7 +230,7 @@ function DeleteCarButton({ car, onDeleted }: { car: Car; onDeleted: () => void }
       variant="ghost"
       size="icon"
       className="ml-auto size-9 shrink-0"
-      aria-label={`Remove ${car.plate}`}
+      aria-label={`${car.plate} машиныг устгах`}
       onClick={() => setConfirming(true)}
     >
       <Trash2 aria-hidden className="size-4" />
