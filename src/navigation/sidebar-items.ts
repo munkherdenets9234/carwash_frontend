@@ -4,6 +4,7 @@ import {
   CalendarCheck,
   CalendarRange,
   Car,
+  CarFront,
   ClipboardList,
   Clock,
   Image as ImageIcon,
@@ -26,6 +27,12 @@ export interface NavItem {
 }
 
 export const managerNav: NavItem[] = [
+  {
+    title: "Ирсэн машин",
+    href: "/manager/register",
+    icon: CarFront,
+    description: "Дугаараар нь бүртгэж, угаагчид өгөх",
+  },
   { title: "Өдрийн тайлан", href: "/manager", icon: BarChart3, description: "Орлого, урамшуулал, ажилласан цаг" },
   {
     title: "Захиалгууд",

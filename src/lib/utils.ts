@@ -154,6 +154,58 @@ export function formatDistance(metres: number | undefined): string {
   return `${Math.round(metres)} м`;
 }
 
+/**
+ * An ISO instant as the value a `datetime-local` input wants, on the
+ * business's clock: "2026-09-25T18:25".
+ *
+ * The input has no timezone of its own — it shows whatever string it is given
+ * — so the conversion has to happen here rather than being left to the
+ * browser, which would show the editor's own zone and silently move the time
+ * for anyone working from a different one.
+ */
+export function isoToBusinessLocal(iso: string): string {
+  const date = new Date(iso);
+  const day = new Intl.DateTimeFormat("en-CA", { timeZone: BUSINESS_TZ }).format(date);
+  const time = new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: BUSINESS_TZ,
+  }).format(date);
+  return `${day}T${time}`;
+}
+
+/**
+ * The reverse: a `datetime-local` value read as business time, returned as an
+ * ISO instant for the API.
+ *
+ * The offset is measured at that moment rather than assumed. Mongolia has not
+ * observed summer time since 2017, so +08:00 would be right today — and a
+ * hard-coded offset is exactly the kind of thing that is right until a
+ * government changes its mind, at which point every booking edited across the
+ * boundary is an hour out and nobody can see why.
+ */
+export function businessLocalToISO(local: string): string {
+  // Read the wall-clock reading as though it were UTC, then subtract the zone
+  // offset in force at that instant.
+  const asUTC = new Date(`${local}:00Z`);
+  const offsetMinutes = businessOffsetMinutes(asUTC);
+  return new Date(asUTC.getTime() - offsetMinutes * 60_000).toISOString();
+}
+
+/** Minutes the business zone is ahead of UTC at a given instant. */
+function businessOffsetMinutes(at: Date): number {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: BUSINESS_TZ,
+    timeZoneName: "longOffset",
+  }).formatToParts(at);
+  const name = parts.find((part) => part.type === "timeZoneName")?.value ?? "GMT+00:00";
+  const match = /GMT([+-])(\d{2}):(\d{2})/.exec(name);
+  if (!match) return 0;
+  const sign = match[1] === "-" ? -1 : 1;
+  return sign * (Number(match[2]) * 60 + Number(match[3]));
+}
+
 export function initialsOf(name: string): string {
   return name
     .split(/\s+/)
